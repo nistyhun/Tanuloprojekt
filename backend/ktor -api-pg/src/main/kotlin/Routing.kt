@@ -1,6 +1,5 @@
 package com.example
 
-import com.example.exception.OrderNotFoundException
 import com.example.exception.ValidationException
 import com.example.model.order.CreateOrderRequest
 import com.example.model.order.PatchOrderRequest

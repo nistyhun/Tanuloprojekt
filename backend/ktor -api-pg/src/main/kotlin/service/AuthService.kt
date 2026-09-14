@@ -4,7 +4,6 @@ import com.example.exception.ValidationException
 import com.example.model.user.LoginRequest
 import com.example.model.user.LoginResponse
 import com.example.model.user.RegisterRequest
-import com.example.model.user.User
 import com.example.model.user.UserResponse
 import com.example.repository.UserRepository
 import com.example.security.JwtConfig
