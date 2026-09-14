@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres-ktor-api
+    environment:
+      POSTGRES_DB: ktor_api
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123qwe
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-ktor-api:/var/lib/postgresql/data
+
+volumes:
+  postgres-ktor-api:

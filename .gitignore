@@ -1,0 +1,16 @@
+# Gradle build output
+**/build/
+.gradle/
+
+# IntelliJ IDEA
+.idea/
+**/.idea/
+*.iml
+
+# Environment / secrets
+.env
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
