@@ -1,15 +1,15 @@
 package com.example
 
-import com.example.database.Categories
-import com.example.database.Orders
 import com.example.database.connectToDB
+import com.example.database.migrateDatabase
 import com.example.database.seedDB
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import com.example.repository.OrderRepository
+import com.example.repository.UserRepository
+import com.example.service.AuthService
+import com.example.service.OrderService
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
-
     io.ktor.server.netty.EngineMain.main(args)
 }
 
@@ -17,13 +17,21 @@ fun Application.module() {
 
     connectToDB(this)
 
-    transaction {
-        SchemaUtils.create(Categories, Orders)
-    }
+    migrateDatabase(this)
 
     seedDB()
 
     configureSerialization()
     configureStatusPages()
-    configureRouting()
+
+    val orderRepository = OrderRepository()
+    val orderService = OrderService(orderRepository)
+
+    val userRepository = UserRepository()
+    val authService = AuthService(userRepository)
+
+    configureRouting(
+        orderService,
+        authService
+    )
 }

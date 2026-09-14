@@ -1,5 +1,6 @@
-package com.example.model
+package com.example.model.order
 
+import com.example.model.common.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 

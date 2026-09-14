@@ -1,0 +1,9 @@
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    role VARCHAR(20) NOT NULL UNIQUE
+);
+
+INSERT INTO roles (role)
+VALUES
+    ('USER'),
+    ('ADMIN');

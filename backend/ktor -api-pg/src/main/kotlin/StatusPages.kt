@@ -3,7 +3,7 @@ package com.example
 import com.example.exception.CategoryNotFoundException
 import com.example.exception.OrderNotFoundException
 import com.example.exception.ValidationException
-import com.example.model.ErrorResponse
+import com.example.model.common.ErrorResponse
 import io.ktor.server.response.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -27,7 +27,16 @@ fun Application.configureStatusPages() {
             )
         }
 
+        exception<BadRequestException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse("Invalid request body")
+            )
+        }
+
         exception<CategoryNotFoundException> { call, cause ->
+            call.application.log.error("Unhandled exception", cause)
+
             call.respond(
                 HttpStatusCode.NotFound,
                 ErrorResponse(cause.message ?: "Category not found")

@@ -1,91 +1,111 @@
 package com.example.service
 
-import com.example.Repository.categoryExists
-import com.example.Repository.createOrder
-import com.example.Repository.patchOrder
-import com.example.Repository.updateOrder
 import com.example.exception.CategoryNotFoundException
 import com.example.exception.OrderNotFoundException
 import com.example.exception.ValidationException
-import com.example.model.CreateOrderRequest
-import com.example.model.OrderResponse
-import com.example.model.PatchOrderRequest
-import com.example.model.UpdateOrderRequest
+import com.example.model.order.CreateOrderRequest
+import com.example.model.order.OrderDetailsResponse
+import com.example.model.order.OrderResponse
+import com.example.model.order.PatchOrderRequest
+import com.example.model.order.UpdateOrderRequest
+import com.example.repository.OrderRepository
 import java.time.LocalDate
 
-fun createOrderService(request: CreateOrderRequest): OrderResponse {
+class OrderService(
+    private val orderRepository: OrderRepository
+) {
 
-    if (!categoryExists(request.categoryId)) {
-        throw CategoryNotFoundException("Category not found")
+    fun getAllOrders(): List<OrderResponse> {
+        return orderRepository.getAllOrders()
     }
 
-    if (request.deadline.isBefore(LocalDate.now())) {
-        throw ValidationException("Deadline cannot be in the past")
+    fun getOrderById(id: Int): OrderDetailsResponse {
+        return orderRepository.getOrderById(id)
+            ?: throw OrderNotFoundException("Order not found")
     }
 
-    if (request.customerName.isBlank()) {
-        throw ValidationException("Customer name cannot be blank")
+    fun deleteOrderById(id: Int) {
+        orderRepository.deleteOrderById(id)
+            ?: throw OrderNotFoundException("Order not found")
     }
 
-    if (request.quantity <= 0) {
-        throw ValidationException("Quantity must be greater than zero")
+    fun createOrder(request: CreateOrderRequest): OrderResponse {
+        if (!orderRepository.categoryExists(request.categoryId)) {
+            throw CategoryNotFoundException("Category not found")
+        }
+
+        if (request.deadline.isBefore(LocalDate.now())) {
+            throw ValidationException("Deadline cannot be in the past")
+        }
+
+        if (request.customerName.isBlank()) {
+            throw ValidationException("Customer name cannot be blank")
+        }
+
+        if (request.quantity <= 0) {
+            throw ValidationException("Quantity must be greater than zero")
+        }
+
+        if (request.publisherName.isBlank()) {
+            throw ValidationException("Publisher name cannot be blank")
+        }
+
+        return orderRepository.createOrder(request)
     }
 
-    if (request.publisherName.isBlank()) {
-        throw ValidationException("Publisher name cannot be blank")
+    fun updateOrder(id: Int, request: UpdateOrderRequest) {
+        if (!orderRepository.categoryExists(request.categoryId)) {
+            throw CategoryNotFoundException("Category not found")
+        }
+
+        if (request.deadline.isBefore(LocalDate.now())) {
+            throw ValidationException("Deadline cannot be in the past")
+        }
+
+        if (request.customerName.isBlank()) {
+            throw ValidationException("Customer name cannot be blank")
+        }
+
+        if (request.quantity <= 0) {
+            throw ValidationException("Quantity must be greater than zero")
+        }
+
+        if (request.publisherName.isBlank()) {
+            throw ValidationException("Publisher name cannot be blank")
+        }
+
+        if (orderRepository.updateOrder(id, request) == 0) {
+            throw OrderNotFoundException("Order not found")
+        }
     }
 
-    return createOrder(request)
-}
+    fun patchOrder(id: Int, request: PatchOrderRequest) {
+        if (request.categoryId != null &&
+            !orderRepository.categoryExists(request.categoryId)
+        ) {
+            throw CategoryNotFoundException("Category not found")
+        }
 
-fun updateOrderService(id: Int, request: UpdateOrderRequest) {
-    if (!categoryExists(request.categoryId)) {
-        throw CategoryNotFoundException("Category not found")
-    }
+        if (request.customerName != null && request.customerName.isBlank()) {
+            throw ValidationException("Customer name cannot be blank")
+        }
 
-    if (request.deadline.isBefore(LocalDate.now())) {
-        throw ValidationException("Deadline cannot be in the past")
-    }
+        if (request.deadline != null &&
+            request.deadline.isBefore(LocalDate.now())
+        ) {
+            throw ValidationException("Deadline cannot be in the past")
+        }
 
-    if (request.customerName.isBlank()) {
-        throw ValidationException("Customer name cannot be blank")
-    }
+        if (request.quantity != null && request.quantity <= 0) {
+            throw ValidationException("Quantity must be greater than zero")
+        }
 
-    if (request.quantity <= 0) {
-        throw ValidationException("Quantity must be greater than zero")
-    }
+        if (request.publisherName != null && request.publisherName.isBlank()) {
+            throw ValidationException("Publisher name cannot be blank")
+        }
 
-    if (request.publisherName.isBlank()) {
-        throw ValidationException("PublisherName cannot be blank")
-    }
-
-    if (updateOrder(id, request)== 0){
-        throw OrderNotFoundException("No order was updated")
-    }
-}
-
-fun patchOrderService(id: Int, request: PatchOrderRequest) {
-    if (request.categoryId != null && !categoryExists(request.categoryId)){
-        throw CategoryNotFoundException("Category not found")
-    }
-
-    if (request.customerName != null && request.customerName.isBlank()){
-        throw ValidationException("Customer name cannot be blank")
-    }
-
-    if (request.deadline != null && request.deadline.isBefore(LocalDate.now())) {
-        throw ValidationException("Deadline cannot be in the past")
-    }
-
-    if (request.quantity != null && request.quantity <= 0) {
-        throw ValidationException("Quantity must be greater than zero")
-    }
-
-    if (request.publisherName != null && request.publisherName.isBlank()) {
-        throw ValidationException("PublisherName cannot be blank")
-    }
-
-    if (patchOrder(id, request) == 0){
-        throw OrderNotFoundException("Order not found")
+        if (orderRepository.patchOrder(id, request) == 0) {
+            throw OrderNotFoundException("Order not found")
+        }
     }
 }

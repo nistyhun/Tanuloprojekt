@@ -28,6 +28,9 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.2")
     implementation("com.zaxxer:HikariCP:6.3.0")
     implementation("io.ktor:ktor-server-status-pages:3.5.2")
+    implementation("org.flywaydb:flyway-core:13.2.0")
+    implementation("org.flywaydb:flyway-database-postgresql:13.2.0")
+    implementation("de.mkammerer:argon2-jvm:2.11")
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)

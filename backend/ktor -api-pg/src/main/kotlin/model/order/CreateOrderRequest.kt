@@ -1,12 +1,12 @@
-package com.example.model
+package com.example.model.order
 
+import com.example.model.common.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
 @Serializable
-data class OrderDetailsResponse(
-    val id: Int,
-    val category: CategoryResponse,
+data class CreateOrderRequest(
+    val categoryId: Int,
     val customerName: String,
 
     @Serializable(with = LocalDateSerializer::class)
