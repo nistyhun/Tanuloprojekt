@@ -5,6 +5,7 @@ import com.example.database.migrateDatabase
 import com.example.database.seedDB
 import com.example.repository.OrderRepository
 import com.example.repository.UserRepository
+import com.example.security.JwtConfig
 import com.example.service.AuthService
 import com.example.service.OrderService
 import io.ktor.server.application.*
@@ -19,16 +20,19 @@ fun Application.module() {
 
     migrateDatabase(this)
 
-    seedDB()
+    val userRepository = UserRepository()
 
-    configureSerialization()
-    configureStatusPages()
+    seedDB(userRepository)
 
     val orderRepository = OrderRepository()
     val orderService = OrderService(orderRepository)
 
-    val userRepository = UserRepository()
-    val authService = AuthService(userRepository)
+    val jwtConfig = JwtConfig(this)
+    val authService = AuthService(userRepository, jwtConfig)
+
+    configureSerialization()
+    configureStatusPages()
+    configureAuthentication(jwtConfig)
 
     configureRouting(
         orderService,

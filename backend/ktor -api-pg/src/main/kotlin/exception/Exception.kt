@@ -8,3 +8,6 @@ class OrderNotFoundException(message: String) :
 
 class CategoryNotFoundException(message: String) :
     RuntimeException(message)
+
+class ForbiddenException(message: String) :
+    RuntimeException(message)

@@ -10,3 +10,10 @@ database:
   driver : "org.postgresql.Driver"
   user: "$DB_USER"
   password: "$DB_PASSWORD"
+
+jwt:
+  secret: "$JWT_SECRET"
+  issuer: "ktor-api"
+  audience: "ktor-users"
+  realm: "ktor-app"
+  expiration: 3600000

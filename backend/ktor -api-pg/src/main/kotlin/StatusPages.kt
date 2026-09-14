@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.exception.CategoryNotFoundException
+import com.example.exception.ForbiddenException
 import com.example.exception.OrderNotFoundException
 import com.example.exception.ValidationException
 import com.example.model.common.ErrorResponse
@@ -40,6 +41,13 @@ fun Application.configureStatusPages() {
             call.respond(
                 HttpStatusCode.NotFound,
                 ErrorResponse(cause.message ?: "Category not found")
+            )
+        }
+
+        exception<ForbiddenException> { call, cause ->
+            call.respond(
+                HttpStatusCode.Forbidden,
+                ErrorResponse(cause.message ?: "Forbidden")
             )
         }
 

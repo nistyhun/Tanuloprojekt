@@ -87,4 +87,27 @@ class UserRepository {
             )
         }
     }
+
+    fun getUserById(userId: Int): User? {
+        return transaction {
+            val user = (Users innerJoin Roles)
+                .selectAll()
+                .where { Users.id eq userId }
+                .singleOrNull()
+
+            if (user == null) {
+                return@transaction null
+            }
+
+            User(
+                id = user[Users.id],
+                firstName = user[Users.firstName],
+                lastName = user[Users.lastName],
+                email = user[Users.email],
+                passwordHash = user[Users.passwordHash],
+                role = user[Roles.role],
+                createdAt = user[Users.createdAt]
+            )
+        }
+    }
 }
