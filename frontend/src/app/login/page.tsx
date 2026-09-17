@@ -1,28 +1,77 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { LoginResponse } from "../types/auth";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [loginError, setLoginError] = useState("");
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const router = useRouter();
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setLoginError("");
+    let isValid = true;
+
     if (email.trim() === "") {
       setEmailError("Az email megadása kötelező");
+      isValid = false;
     } else if (!emailRegex.test(email)) {
       setEmailError("Érvénytelen email cím");
+      isValid = false;
     }
     if (password.trim() === "") {
       setPasswordError("A jelszó megadása kötelező");
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      console.log(email);
+      console.log(password);
+
+      if (response.status === 401) {
+        setLoginError("Hibás email cím vagy jelszó");
+        return;
+      }
+
+      if (!response.ok) {
+        setLoginError("Hiba történt a bejelentkezés során");
+        return;
+      }
+
+      const data: LoginResponse = await response.json();
+
+      localStorage.setItem("token", data.token);
+
+      router.push("/orders");
+
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+      setLoginError("Nem sikerült kapcsolódni a szerverhez");
     }
   };
-
-  console.log(email);
-  console.log(password);
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -73,6 +122,7 @@ const LoginPage = () => {
               <p className="mt-1 text-sm text-red-600">{passwordError}</p>
             )}
           </div>
+          {loginError && <p className="text-sm text-red-600">{loginError}</p>}
           <div>
             <button
               type="submit"
