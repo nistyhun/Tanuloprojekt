@@ -32,6 +32,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql:13.2.0")
     implementation("de.mkammerer:argon2-jvm:2.11")
     implementation("io.ktor:ktor-server-auth-jwt:3.5.2")
+    implementation("io.ktor:ktor-server-cors-jvm:2.3.12")
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)

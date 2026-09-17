@@ -1,5 +1,6 @@
 package com.example.service
 
+import com.example.exception.InvalidCredentialsException
 import com.example.exception.ValidationException
 import com.example.model.user.LoginRequest
 import com.example.model.user.LoginResponse
@@ -63,7 +64,7 @@ class AuthService(
         val email = request.email.trim().lowercase()
 
         val user = userRepository.getUserByEmail(email)
-            ?: throw ValidationException("Invalid email or password")
+            ?: throw InvalidCredentialsException("Invalid email or password")
 
         val validPassword = PasswordHasher.verify(
             request.password,
@@ -71,7 +72,7 @@ class AuthService(
         )
 
         if (!validPassword) {
-            throw ValidationException("Invalid email or password")
+            throw InvalidCredentialsException("Invalid email or password")
         }
 
         val token = jwtConfig.generateToken(

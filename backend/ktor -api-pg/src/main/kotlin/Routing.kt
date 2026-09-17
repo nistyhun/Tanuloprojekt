@@ -9,6 +9,7 @@ import com.example.model.user.RegisterRequest
 import com.example.security.requireRole
 import com.example.service.OrderService
 import com.example.service.AuthService
+import com.example.service.CategoryService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.auth.authenticate
@@ -20,7 +21,8 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting(
     orderService: OrderService,
-    authService: AuthService
+    authService: AuthService,
+    categoryService: CategoryService
 ) {
     routing {
         authenticate("auth-jwt") {
@@ -37,6 +39,12 @@ fun Application.configureRouting(
 
                 call.respond(HttpStatusCode.OK, order)
             }
+
+            get("/categories"){
+                val categories = categoryService.getAllCategories()
+                call.respond(categories)
+            }
+
             delete("/orders/{id}") {
                 call.requireRole(adminRole)
                 val id = call.parameters["id"]?.toIntOrNull() ?: throw ValidationException("Invalid order id")

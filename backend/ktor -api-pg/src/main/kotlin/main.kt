@@ -3,10 +3,12 @@ package com.example
 import com.example.database.connectToDB
 import com.example.database.migrateDatabase
 import com.example.database.seedDB
+import com.example.repository.CategoryRepository
 import com.example.repository.OrderRepository
 import com.example.repository.UserRepository
 import com.example.security.JwtConfig
 import com.example.service.AuthService
+import com.example.service.CategoryService
 import com.example.service.OrderService
 import io.ktor.server.application.*
 
@@ -30,12 +32,17 @@ fun Application.module() {
     val jwtConfig = JwtConfig(this)
     val authService = AuthService(userRepository, jwtConfig)
 
+    val categoryRepository = CategoryRepository()
+    val categoryService = CategoryService(categoryRepository)
+
     configureSerialization()
     configureStatusPages()
+    configureCors()
     configureAuthentication(jwtConfig)
 
     configureRouting(
         orderService,
-        authService
+        authService,
+        categoryService,
     )
 }

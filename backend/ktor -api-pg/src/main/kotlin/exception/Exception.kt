@@ -11,3 +11,6 @@ class CategoryNotFoundException(message: String) :
 
 class ForbiddenException(message: String) :
     RuntimeException(message)
+
+class InvalidCredentialsException(message: String) :
+    RuntimeException(message)

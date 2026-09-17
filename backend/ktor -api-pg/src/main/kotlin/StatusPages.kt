@@ -2,6 +2,7 @@ package com.example
 
 import com.example.exception.CategoryNotFoundException
 import com.example.exception.ForbiddenException
+import com.example.exception.InvalidCredentialsException
 import com.example.exception.OrderNotFoundException
 import com.example.exception.ValidationException
 import com.example.model.common.ErrorResponse
@@ -55,6 +56,13 @@ fun Application.configureStatusPages() {
             call.respond(
                 HttpStatusCode.InternalServerError,
                 ErrorResponse("Internal server error")
+            )
+        }
+
+        exception<InvalidCredentialsException> { call, cause ->
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                mapOf("message" to cause.message)
             )
         }
     }
