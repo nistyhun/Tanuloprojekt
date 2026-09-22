@@ -1,6 +1,9 @@
 export type Order = {
   id: number;
-  categoryId: number;
+  category: {
+    id: number;
+    type: string;
+  };
   customerName: string;
   deadline: string;
   quantity: number;

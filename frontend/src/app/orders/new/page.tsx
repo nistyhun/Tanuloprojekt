@@ -129,8 +129,8 @@ const NewOrderPage = () => {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8">
-      <div className="w-full max-w-2xl">
+    <main className="min-h-screen flex items-start justify-center bg-gray-100 px-4 py-8">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl px-4 py-4">
         <h1 className="text-2xl font-semibold text-gray-900">Új rendelés</h1>
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           {orderError && (

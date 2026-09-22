@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { User } from "../types/auth";
+import { useUser } from "../context/UserContext";
 import { Order } from "../types/order";
 
 const OrdersPage = () => {
@@ -11,12 +11,7 @@ const OrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
-  };
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -27,8 +22,6 @@ const OrdersPage = () => {
           router.push("/login");
           return;
         }
-
-        await fetchUser(token);
 
         const response = await fetch("http://localhost:8080/orders", {
           headers: {
@@ -55,28 +48,6 @@ const OrdersPage = () => {
       } finally {
         setLoading(false);
       }
-    };
-
-    const fetchUser = async (token: string) => {
-      const response = await fetch("http://localhost:8080/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 401) {
-        localStorage.removeItem("token");
-        router.push("/login");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Nem sikerült lekérni a felhasználót");
-      }
-
-      const data: User = await response.json();
-
-      setUser(data);
     };
 
     fetchOrders();
@@ -109,33 +80,17 @@ const OrdersPage = () => {
               Aktuális rendelések listája
             </p>
           </div>
-
-          {user && (
-            <div className="text-right">
-              <p className="font-medium text-gray-900">
-                {user.firstName} {user.lastName}
-              </p>
-
-              <p className="text-sm text-gray-500">{user.role}</p>
-              <button
-                onClick={handleLogout}
-                className="mt-2 text-sm text-red-600 hover:text-red-700"
+          {user?.role === "ADMIN" && (
+            <div className="mb-2">
+              <Link
+                href="/orders/new"
+                className="w-auto rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
               >
-                Kijelentkezés
-              </button>
+                Új rendelés
+              </Link>
             </div>
           )}
         </div>
-        {user?.role === "ADMIN" && (
-          <div className="mb-2">
-            <Link
-              href="/orders/new"
-              className="w-auto rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-            >
-              Új rendelés
-            </Link>
-          </div>
-        )}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {orders.map((order) => (
             <div key={order.id} className="rounded-xl bg-white p-4 shadow-sm">

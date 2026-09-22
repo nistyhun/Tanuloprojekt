@@ -127,6 +127,10 @@ const OrderPage = () => {
           </p>
 
           <p>
+            <strong>Kategória:</strong> {order.category.type}
+          </p>
+
+          <p>
             <strong>Megrendelő:</strong> {order.customerName}
           </p>
 
