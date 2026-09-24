@@ -1,11 +1,11 @@
-package com.example
+package com.example.setup.plugin
 
-import com.example.exception.CategoryNotFoundException
-import com.example.exception.ForbiddenException
-import com.example.exception.InvalidCredentialsException
-import com.example.exception.OrderNotFoundException
-import com.example.exception.ValidationException
-import com.example.model.common.ErrorResponse
+import com.example.domain.exception.CategoryNotFoundException
+import com.example.domain.exception.ForbiddenException
+import com.example.domain.exception.InvalidCredentialsException
+import com.example.domain.exception.OrderNotFoundException
+import com.example.domain.exception.ValidationException
+import com.example.routes.dto.ErrorResponse
 import io.ktor.server.response.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*

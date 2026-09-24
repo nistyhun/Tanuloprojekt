@@ -1,4 +1,4 @@
-package com.example.domain.category
+package com.example.repository.category.dto
 
 import kotlinx.serialization.Serializable
 

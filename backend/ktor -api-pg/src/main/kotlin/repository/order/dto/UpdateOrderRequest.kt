@@ -1,6 +1,6 @@
-package com.example.domain.order
+package com.example.repository.order.dto
 
-import com.example.model.common.LocalDateSerializer
+import com.example.setup.plugin.serialization.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 

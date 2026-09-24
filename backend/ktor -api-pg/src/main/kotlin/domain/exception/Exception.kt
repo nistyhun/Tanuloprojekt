@@ -1,4 +1,4 @@
-package com.example.exception
+package com.example.domain.exception
 
 class ValidationException(message: String) :
     RuntimeException(message)

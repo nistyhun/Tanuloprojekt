@@ -1,15 +1,19 @@
 package com.example
 
-import com.example.database.connectToDB
-import com.example.database.migrateDatabase
-import com.example.database.seedDB
-import com.example.repository.CategoryRepository
-import com.example.repository.OrderRepository
-import com.example.repository.UserRepository
-import com.example.security.JwtConfig
-import com.example.service.AuthService
-import com.example.service.CategoryService
-import com.example.service.OrderService
+import com.example.setup.database.connectToDB
+import com.example.setup.database.migrateDatabase
+import com.example.setup.database.seedDB
+import com.example.repository.category.DbCategoryRepository
+import com.example.repository.order.DbOrderRepository
+import com.example.repository.user.DbUserRepository
+import com.example.routes.configureRouting
+import com.example.setup.plugin.auth.JwtConfig
+import com.example.domain.auth.AuthService
+import com.example.domain.category.CategoryService
+import com.example.domain.order.OrderService
+import com.example.setup.plugin.configureCors
+import com.example.setup.plugin.configureSerialization
+import com.example.setup.plugin.configureStatusPages
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -18,21 +22,30 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
 
-    connectToDB(this)
+    val config = environment.config
 
-    migrateDatabase(this)
+    val dbUrl = config.property("database.url").getString()
+    val username = config.property("database.user").getString()
+    val password = config.property("database.password").getString()
 
-    val userRepository = UserRepository()
+    connectToDB(dbUrl, username, password)
 
-    seedDB(userRepository)
+    migrateDatabase(dbUrl, username, password)
 
-    val orderRepository = OrderRepository()
-    val orderService = OrderService(orderRepository)
+    val dbUserRepository = DbUserRepository()
+
+    val adminEmail = config.property("admin.email").getString()
+    val adminPassword = config.property("admin.password").getString()
+
+    seedDB(dbUserRepository, adminEmail, adminPassword)
+
+    val dbOrderRepository = DbOrderRepository()
+    val orderService = OrderService(dbOrderRepository)
 
     val jwtConfig = JwtConfig(this)
-    val authService = AuthService(userRepository, jwtConfig)
+    val authService = AuthService(dbUserRepository, jwtConfig)
 
-    val categoryRepository = CategoryRepository()
+    val categoryRepository = DbCategoryRepository()
     val categoryService = CategoryService(categoryRepository)
 
     configureSerialization()

@@ -1,4 +1,4 @@
-package com.example.domain.exception
+package com.example.routes.dto
 
 import kotlinx.serialization.Serializable
 

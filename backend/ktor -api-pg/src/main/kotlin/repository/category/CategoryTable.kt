@@ -2,6 +2,6 @@ package com.example.repository.category
 
 import com.example.repository.rest.EntityTable
 
-object CategoriesTable : EntityTable("categories") {
+object CategoryTable : EntityTable("categories") {
     val type = varchar("type", 255)
 }

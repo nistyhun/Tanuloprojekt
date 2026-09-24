@@ -1,4 +1,4 @@
-package com.example.security
+package com.example.setup.plugin.auth
 
 import com.example.domain.exception.ValidationException
 import io.ktor.server.auth.principal

@@ -1,14 +1,13 @@
-package com.example.service
+package com.example.domain.order
 
-import com.example.exception.CategoryNotFoundException
-import com.example.exception.OrderNotFoundException
-import com.example.exception.ValidationException
-import com.example.model.order.CreateOrderRequest
-import com.example.model.order.OrderDetailsResponse
-import com.example.model.order.OrderResponse
-import com.example.model.order.PatchOrderRequest
-import com.example.model.order.UpdateOrderRequest
-import com.example.repository.order.OrderRepository
+import com.example.domain.exception.CategoryNotFoundException
+import com.example.domain.exception.OrderNotFoundException
+import com.example.domain.exception.ValidationException
+import com.example.repository.order.dto.CreateOrderRequest
+import com.example.repository.order.dto.OrderDetailsResponse
+import com.example.repository.order.dto.OrderResponse
+import com.example.repository.order.dto.PatchOrderRequest
+import com.example.repository.order.dto.UpdateOrderRequest
 import java.time.LocalDate
 
 class OrderService(

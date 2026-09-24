@@ -1,4 +1,4 @@
-package com.example.model.user
+package com.example.domain.user
 
 import java.time.LocalDateTime
 

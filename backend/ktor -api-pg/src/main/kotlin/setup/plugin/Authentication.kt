@@ -1,7 +1,7 @@
 package com.example
 
 import com.example.routes.dto.ErrorResponse
-import com.example.security.JwtConfig
+import com.example.setup.plugin.auth.JwtConfig
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

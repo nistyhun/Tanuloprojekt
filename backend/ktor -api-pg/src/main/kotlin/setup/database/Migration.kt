@@ -1,17 +1,11 @@
-package com.example.database
+package com.example.setup.database
 
-import io.ktor.server.application.Application
 import org.flywaydb.core.Flyway
 
-fun migrateDatabase(application: Application) {
-    val config = application.environment.config
-
-    val url = config.property("database.url").getString()
-    val user = config.property("database.user").getString()
-    val password = config.property("database.password").getString()
+fun migrateDatabase(dbUrl: String, username: String, password: String) {
 
     val flyway = Flyway.configure()
-        .dataSource(url, user, password)
+        .dataSource(dbUrl, username, password)
         .locations("classpath:db/migration")
         .load()
 

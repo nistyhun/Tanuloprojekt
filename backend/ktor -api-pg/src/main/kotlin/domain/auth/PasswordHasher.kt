@@ -1,4 +1,4 @@
-package com.example.security
+package com.example.domain.auth
 
 import de.mkammerer.argon2.Argon2Factory
 

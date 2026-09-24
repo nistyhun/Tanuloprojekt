@@ -1,6 +1,6 @@
-package com.example.model.user
+package com.example.repository.user.dto
 
-import com.example.model.common.LocalDateTimeSerializer
+import com.example.setup.plugin.serialization.LocalDateTimeSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 

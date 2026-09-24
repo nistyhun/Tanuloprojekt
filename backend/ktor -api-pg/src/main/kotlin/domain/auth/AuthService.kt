@@ -1,17 +1,15 @@
-package com.example.service
+package com.example.domain.auth
 
-import com.example.exception.InvalidCredentialsException
-import com.example.exception.ValidationException
-import com.example.model.user.LoginRequest
-import com.example.model.user.LoginResponse
-import com.example.model.user.RegisterRequest
-import com.example.model.user.UserResponse
-import com.example.repository.user.UserRepository
-import com.example.security.JwtConfig
-import com.example.security.PasswordHasher
+import com.example.domain.exception.InvalidCredentialsException
+import com.example.domain.exception.ValidationException
+import com.example.repository.user.dto.LoginRequest
+import com.example.repository.user.dto.LoginResponse
+import com.example.repository.user.dto.RegisterRequest
+import com.example.repository.user.dto.UserResponse
+import com.example.setup.plugin.auth.JwtConfig
 
 class AuthService(
-    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository,
     private val jwtConfig: JwtConfig
 ) {
 
@@ -29,11 +27,11 @@ class AuthService(
         validateEmail(email)
         validatePassword(request.password)
 
-        if (userRepository.emailExists(request.email)) {
+        if (authRepository.emailExists(request.email)) {
             throw ValidationException("Email already exists")
         }
 
-        val roleId = userRepository.getRoleByName("USER")
+        val roleId = authRepository.getRoleByName("USER")
             ?: throw ValidationException("Default role not found")
 
         val passwordHash = PasswordHasher.hash(request.password)
@@ -44,7 +42,7 @@ class AuthService(
             email = email
         )
 
-        val user = userRepository.createUser(
+        val user = authRepository.createUser(
             request = normalizedRequest,
             passwordHash = passwordHash,
             roleId = roleId
@@ -63,7 +61,7 @@ class AuthService(
     fun login(request: LoginRequest): LoginResponse {
         val email = request.email.trim().lowercase()
 
-        val user = userRepository.getUserByEmail(email)
+        val user = authRepository.getUserByEmail(email)
             ?: throw InvalidCredentialsException("Invalid email or password")
 
         val validPassword = PasswordHasher.verify(
@@ -97,7 +95,7 @@ class AuthService(
     }
 
     fun getCurrentUser(userId: Int): UserResponse {
-        val user = userRepository.getUserById(userId)
+        val user = authRepository.getUserById(userId)
             ?: throw ValidationException("User not found")
 
         return UserResponse(

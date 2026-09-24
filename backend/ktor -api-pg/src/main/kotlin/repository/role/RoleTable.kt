@@ -1,10 +1,7 @@
-package com.example.database
+package com.example.repository.role
 
-import org.jetbrains.exposed.v1.core.Table
+import com.example.repository.rest.EntityTable
 
-object Roles : Table("roles") {
-    val id = integer("id").autoIncrement()
+object RoleTable : EntityTable("roles") {
     val role = varchar("role", 20).uniqueIndex()
-
-    override val primaryKey = PrimaryKey(id)
 }

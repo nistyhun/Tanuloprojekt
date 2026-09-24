@@ -1,0 +1,7 @@
+ALTER TABLE orders DROP CONSTRAINT fk_orders_category;
+
+ALTER TABLE orders ADD CONSTRAINT fk_orders_category_id__id FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE users DROP CONSTRAINT fk_users_role;
+
+ALTER TABLE users ADD CONSTRAINT fk_users_role_id__id FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT ON UPDATE RESTRICT;

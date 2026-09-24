@@ -1,7 +1,6 @@
-package com.example.service
+package com.example.domain.category
 
-import com.example.service.category.CategoryResponse
-import com.example.service.category.CategoryRepository
+import com.example.repository.category.dto.CategoryResponse
 
 class CategoryService(
     private val categoryRepository: CategoryRepository

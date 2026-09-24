@@ -1,38 +1,44 @@
-package com.example.database
+package com.example.setup.database
 
-import com.example.repository.user.UserRepository
-import com.example.security.PasswordHasher
+import com.example.repository.user.DbUserRepository
+import com.example.domain.auth.PasswordHasher
 import net.datafaker.Faker
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.LocalDate
 import kotlin.random.Random
-import com.example.model.user.RegisterRequest
-import com.example.repository.category.CategoriesTable
+import com.example.repository.user.dto.RegisterRequest
+import com.example.repository.category.CategoryTable
 import com.example.repository.order.OrderTable
-import io.ktor.server.config.ApplicationConfig
+import java.time.LocalDateTime
 
-fun seedDB(userRepository:
-           UserRepository,
-           config: ApplicationConfig) {
+fun seedDB(dbUserRepository:
+           DbUserRepository,
+           adminEmail: String,
+           adminPassword: String) {
 
     transaction {
-        if (CategoriesTable.selectAll().empty()) {
+
+        val now = LocalDateTime.now()
+
+        if (CategoryTable.selectAll().empty()) {
             val categories = listOf(
                 "könyv",
                 "magazin",
                 "napilap",
                 "szórólap"
             )
-            CategoriesTable.batchInsert(categories) { category ->
-                this[CategoriesTable.type] = category
+            CategoryTable.batchInsert(categories) { category ->
+                this[CategoryTable.type] = category
+                this[CategoryTable.createdAt] = now
+                this[CategoryTable.updatedAt] = now
             }
         }
 
         if (OrderTable.selectAll().empty()) {
 
-            val categoryIds = CategoriesTable.selectAll().map { it[CategoriesTable.id] }
+            val categoryIds = CategoryTable.selectAll().map { it[CategoryTable.id] }
 
             val faker = Faker()
 
@@ -42,39 +48,36 @@ fun seedDB(userRepository:
                 this[OrderTable.deadline] = LocalDate.now().plusDays(Random.nextLong(1, 31))
                 this[OrderTable.quantity] = Random.nextInt(1, 50)
                 this[OrderTable.publisherName] = faker.name().fullName()
+                this[OrderTable.createdAt] = now
+                this[OrderTable.updatedAt] = now
             }
         }
     }
-    seedAdmin(userRepository, config)
+    seedAdmin(dbUserRepository, adminEmail, adminPassword)
 }
 
 private fun seedAdmin(
-    userRepository: UserRepository,
-    config: ApplicationConfig) {
+    dbUserRepository: DbUserRepository,
+    adminEmail: String,
+    adminPassword: String) {
 
-    val email = config.property("ADMIN_EMAIL").getString()
-        ?: return
-
-    val password = config.property("ADMIN_PASSWORD").getString()
-        ?: return
-
-    if (userRepository.emailExists(email)) {
+    if (dbUserRepository.emailExists(adminEmail)) {
         return
     }
 
-    val roleId = userRepository.getRoleByName("ADMIN")
+    val roleId = dbUserRepository.getRoleByName("ADMIN")
         ?: throw IllegalStateException("ADMIN role not found")
 
-    val passwordHash = PasswordHasher.hash(password)
+    val passwordHash = PasswordHasher.hash(adminPassword)
 
     val request = RegisterRequest(
         firstName = "System",
         lastName = "Admin",
-        email = email,
-        password = password
+        email = adminEmail,
+        password = adminPassword
     )
 
-    userRepository.createUser(
+    dbUserRepository.createUser(
         request = request,
         passwordHash = passwordHash,
         roleId = roleId
