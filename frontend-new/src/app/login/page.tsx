@@ -1,6 +1,19 @@
-"use client"
+"use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+type LoginResponse = {
+  token: string;
+  user: {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    createdAt: string;
+  };
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,6 +23,8 @@ export default function LoginPage() {
   const [loginError, setLoginError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const router = useRouter();
+
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -19,7 +34,7 @@ export default function LoginPage() {
     setPasswordError("");
     setLoginError("");
 
-    if (!email.trim()){
+    if (!email.trim()) {
       setEmailError("Az email cím megadása kötelező");
       hasError = true;
     } else if (!emailRegex.test(email.trim())) {
@@ -28,43 +43,58 @@ export default function LoginPage() {
     }
 
     if (!password) {
-    setPasswordError("A jelszó megadása kötelező.");
-    hasError = true;
+      setPasswordError("A jelszó megadása kötelező.");
+      hasError = true;
     }
 
-    if (hasError){
+    if (hasError) {
       return;
     }
 
-    console.log("Email:", email);
-    console.log("Password:", password);
-
     setIsLoading(true);
 
-    try{
-    const response = await fetch("http://localhost:8080/auth/login", {
-      method: "POST",
-      headers:{
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password
-      }),
-    });
-    console.log(response)
-  } catch(error) {
-    console.log(error);
-    setLoginError("Nem sikerült kapcsolódni a szerverhez.");
-  } finally {
-    setIsLoading(false);
-  }
+    try {
+      const response = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+      console.log(response);
+
+      if (response.status === 401) {
+        setLoginError("Hibás email cím, vagy jelszó.");
+        return;
+      }
+
+      if (!response.ok) {
+        setLoginError("Hiba történt a bejelentkezés során.");
+        return;
+      }
+
+      const data: LoginResponse = await response.json();
+      localStorage.setItem("token", data.token);
+      router.push("/orders");
+    } catch (error) {
+      console.log(error);
+      setLoginError("Nem sikerült kapcsolódni a szerverhez.");
+    } finally {
+      setIsLoading(false);
+    }
   }
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
         <h1 className="mb-6 text-2xl font-semibold">Bejelentkezés</h1>
-        <form noValidate className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <form
+          noValidate
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit}
+        >
           <div className="flex flex-col gap-2">
             <label htmlFor="email">Email</label>
             <input
@@ -78,13 +108,9 @@ export default function LoginPage() {
                 emailError
                   ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                }`}
-              />
-            { emailError && (
-              <p className="text-sm text-red-600">
-                {emailError}
-              </p>
-          )}
+              }`}
+            />
+            {emailError && <p className="text-sm text-red-600">{emailError}</p>}
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="password">Jelszó</label>
@@ -99,25 +125,20 @@ export default function LoginPage() {
                 passwordError
                   ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                }`}
+              }`}
             />
           </div>
-          { passwordError && (
-            <p className="text-sm text-red-600">
-              {passwordError}
-            </p>
+          {passwordError && (
+            <p className="text-sm text-red-600">{passwordError}</p>
           )}
           <button
             type="submit"
             disabled={isLoading}
-            className="cursor-pointer rounded-md bg-blue-600 px-3 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400">
+            className="cursor-pointer rounded-md bg-blue-600 px-3 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+          >
             {isLoading ? "Bejelentkezés..." : "Bejelentkezés"}
           </button>
-          {loginError && (
-            <p className="text-sm text-red-600">
-              {loginError}
-            </p>
-          )}
+          {loginError && <p className="text-sm text-red-600">{loginError}</p>}
         </form>
       </section>
     </main>
