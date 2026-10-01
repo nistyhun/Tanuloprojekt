@@ -69,9 +69,9 @@ export default function OrderDetailsPage() {
           </>
         )}
         <div className="mt-2">
-          <button className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white">
+          <Link href={`/orders/${params.id}/edit`} className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white">
             Szerkesztés
-          </button>
+          </Link>
           <button
             className="mr-2 cursor-pointer rounded-md bg-red-500 p-2 text-white"
             onClick={() => setIsDeleteModalOpen(true)}
