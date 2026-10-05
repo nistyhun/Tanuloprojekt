@@ -28,3 +28,11 @@ export type CreateOrder = {
   deadline: string;
   quantity: number;
 };
+
+export type UpdateOrder = {
+  categoryId: number;
+  customerName: string;
+  deadline: string;
+  quantity: number;
+  publisherName: string;
+};
