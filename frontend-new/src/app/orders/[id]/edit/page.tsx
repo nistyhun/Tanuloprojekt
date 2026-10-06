@@ -1,7 +1,10 @@
 "use client";
 
+import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { Category, UpdateOrder } from "@/app/types/order";
-import { OrderDetails } from "@/app/types/order";
+import OrderForm from "@/components/orders/OrderForm";
+import { getCategories, getOrderById, updateOrder } from "@/lib/api";
+import { validateOrder } from "@/lib/validateOrder";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,92 +25,68 @@ export default function EditOrderPage() {
     deadline: "",
     quantity: "",
   });
+  const [categoriesError, setCategoriesError] = useState("");
+  const [orderError, setOrderError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const getAuthToken = useRequireAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
 
     if (!token) {
       return;
     }
 
-    async function fetchOrderDetails() {
-      const response = await fetch(
-        `http://localhost:8080/orders/${params.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+    async function fetchOrderDetails(id: string, authToken: string) {
+      try {
+        const data = await getOrderById(id, authToken);
 
-      if (!response.ok) {
-        return;
+        setCustomerName(data.customerName);
+        setPublisherName(data.publisherName);
+        setDeadline(data.deadline);
+        setQuantity(data.quantity);
+        setCategoryId(data.category.id);
+      } catch (error) {
+        console.error("A rendelés lekérési hibája:", error);
+        setOrderError("Nem sikerült betölteni a rendelés adatait.");
       }
-
-      const data: OrderDetails = await response.json();
-      console.log(data);
-      setCustomerName(data.customerName);
-      setPublisherName(data.publisherName);
-      setDeadline(data.deadline);
-      setQuantity(data.quantity);
-      setCategoryId(data.category.id);
     }
 
-    async function fetchCategories() {
-      const response = await fetch("http://localhost:8080/categories", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        return;
+    async function fetchCategories(authToken: string) {
+      try {
+        const data = await getCategories(authToken);
+        setCategories(data);
+      } catch {
+        setCategoriesError("Nem sikerült betölteni a kategóriákat.");
       }
-
-      const data: Category[] = await response.json();
-      setCategories(data);
     }
 
-    fetchOrderDetails();
-    fetchCategories();
-  }, [params.id]);
+    const id = params.id;
+
+    if (typeof id !== "string") {
+      return;
+    }
+
+    fetchOrderDetails(id, token);
+    fetchCategories(token);
+  }, [getAuthToken, params.id]);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
 
     if (!token) {
       return;
     }
 
-    const newErrors = {
-      customerName: "",
-      publisherName: "",
-      categoryId: "",
-      deadline: "",
-      quantity: "",
-    };
-
-    if (!customerName.trim()) {
-      newErrors.customerName = "A megrendelő megadása kötelező.";
-    }
-
-    if (!publisherName.trim()) {
-      newErrors.publisherName = "A kiadó megadása kötelező";
-    }
-
-    if (categoryId === 0) {
-      newErrors.categoryId = "Válassz kategóriát.";
-    }
-
-    if (!deadline) {
-      newErrors.deadline = "A határidő megadása kötelező";
-    }
-
-    if (quantity < 1) {
-      newErrors.quantity = "A mennyiség legalább 1 legyen";
-    }
+    const newErrors = validateOrder({
+      customerName,
+      publisherName,
+      categoryId,
+      deadline,
+      quantity,
+    });
 
     setErrors(newErrors);
 
@@ -125,96 +104,44 @@ export default function EditOrderPage() {
       publisherName,
     };
 
-    const response = await fetch(`http://localhost:8080/orders/${params.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(updatedOrder),
-    });
+    console.log(updatedOrder);
 
-    if (!response.ok) {
-      console.log("Sikertelen módosítás");
-      return;
+    try {
+      await updateOrder(`${params.id}`, updatedOrder, token);
+      console.log("Sikeres módosítás");
+      router.push(`/orders/${params.id}`);
+    } catch (error) {
+      console.error("A rendelés módosítása sikertelen:", error);
+      setSubmitError(
+        error instanceof Error ? error.message : "Ismeretlen hiba történt.",
+      );
     }
-    console.log("Sikeres módosítás");
-    router.push(`/orders/${params.id}`);
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h2 className="mb-6 text-2xl font-semibold">Rendelés szerkesztése</h2>
         <form onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="customerName">Megrendelő</label>
-            <input
-              type="text"
-              id="customerName"
-              className="border border-gray-400 rounded-md p-1"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            ></input>
-            {errors.customerName && (
-              <p className="text-sm text-red-500">{errors.customerName}</p>
-            )}
-            <label htmlFor="publisherName">Kiadó</label>
-            <input
-              type="text"
-              id="publisherName"
-              name="publisherName"
-              className="border border-gray-400 rounded-md p-1"
-              value={publisherName}
-              onChange={(e) => setPublisherName(e.target.value)}
-            ></input>
-            {errors.publisherName && (
-              <p className="text-sm text-red-500">{errors.publisherName}</p>
-            )}
-            <label htmlFor="category">Kategória</label>
-            <select
-              id="category"
-              name="category"
-              className="border border-gray-400 rounded-md p-1"
-              value={categoryId}
-              onChange={(e) => setCategoryId(Number(e.target.value))}
-            >
-              <option value="0">Válassz kategóriát</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.type}
-                </option>
-              ))}
-            </select>
-            {errors.categoryId && (
-              <p className="text-sm text-red-500">{errors.categoryId}</p>
-            )}
-            <label htmlFor="deadline">Határidő</label>
-            <input
-              id="deadline"
-              name="deadline"
-              type="date"
-              className="border border-gray-400 rounded-md p-1"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-            ></input>
-            {errors.deadline && (
-              <p className="text-sm text-red-500">{errors.deadline}</p>
-            )}
-            <label htmlFor="quantity">Mennyiség</label>
-            <input
-              id="quantity"
-              name="quantity"
-              type="number"
-              min={1}
-              className="border border-gray-400 rounded-md p-1"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-            ></input>
-            {errors.quantity && (
-              <p className="text-sm text-red-500">{errors.quantity}</p>
-            )}
-          </div>
+          <OrderForm
+            title="Rendelés szerkesztése"
+            customerName={customerName}
+            onCustomerNameChange={setCustomerName}
+            publisherName={publisherName}
+            onPublisherNameChange={setPublisherName}
+            categories={categories}
+            categoryId={categoryId}
+            onCategoryChange={setCategoryId}
+            deadline={deadline}
+            onDeadlineChange={setDeadline}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            errors={errors}
+          ></OrderForm>
+          {categoriesError && (
+            <p className="text-sm text-red-500">{categoriesError}</p>
+          )}
+          {orderError && <p className="text-sm text-red-500">{orderError}</p>}
+          {submitError && <p className="text-sm text-red-500">{submitError}</p>}
           <div className="mt-2">
             <button
               type="submit"

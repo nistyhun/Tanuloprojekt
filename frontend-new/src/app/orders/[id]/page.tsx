@@ -1,6 +1,8 @@
 "use client";
 
-import { OrderDetails } from "@/app/types/order";
+import { useRequireAuth } from "@/app/hooks/useRequireAuth";
+import type { OrderDetails } from "@/app/types/order";
+import { deleteOrder, getOrderById } from "@/lib/api";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,54 +12,55 @@ export default function OrderDetailsPage() {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const router = useRouter();
+  const [deleteError, setDeleteError] = useState("");
+  const [orderError, setOrderError] = useState("");
+  const getAuthToken = useRequireAuth();
+
   async function handleDelete() {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const token = getAuthToken();
+    const id = params.id;
+    if (!token || typeof id !== "string") {
       return;
     }
-    const response = await fetch(`http://localhost:8080/orders/${params.id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      return;
+    setDeleteError("");
+    try {
+      await deleteOrder(id, token);
+      setIsDeleteModalOpen(false);
+      router.push("/orders");
+    } catch (error) {
+      console.error("A rendelés törlése sikertelen:", error);
+      setDeleteError("Nem sikerült törölni a rendelést.");
     }
-    console.log("Sikeres törlés");
-    setIsDeleteModalOpen(false);
-    router.push("/orders");
   }
-  useEffect(() => {
-    const token = localStorage.getItem("token");
 
-    if (!token) {
+  useEffect(() => {
+    const token = getAuthToken();
+    const id = params.id;
+
+    if (!token || typeof id !== "string") {
       return;
     }
 
-    async function fetchOrder() {
-      const response = await fetch(
-        `http://localhost:8080/orders/${params.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        return;
+    async function fetchOrder(orderId: string, authToken: string) {
+      try {
+        const data = await getOrderById(orderId, authToken);
+        setOrder(data);
+        console.log(data);
+      } catch (error) {
+        console.error("A rendelés lekérési hibája:", error);
+        setOrderError("Nem sikerült betölteni a rendelést.");
       }
-      const data: OrderDetails = await response.json();
-      setOrder(data);
-      console.log(data);
     }
-    fetchOrder();
-  }, [params.id]);
+    fetchOrder(id, token);
+  }, [getAuthToken, params.id]);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
         <h2 className="mb-6 text-2xl font-semibold">Rendelés részletei</h2>
+        {orderError && (
+          <p className="mb-4 text-sm text-red-500">{orderError}</p>
+        )}
         <p>Rendelés id: {params.id}</p>
         {order && (
           <>
@@ -69,7 +72,10 @@ export default function OrderDetailsPage() {
           </>
         )}
         <div className="mt-2">
-          <Link href={`/orders/${params.id}/edit`} className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white">
+          <Link
+            href={`/orders/${params.id}/edit`}
+            className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white"
+          >
             Szerkesztés
           </Link>
           <button
@@ -92,10 +98,15 @@ export default function OrderDetailsPage() {
             <h2 className="text-lg font-semibold">Rendelés törlése</h2>
 
             <p className="mt-2">Biztosan törölni szeretnéd ezt a rendelést?</p>
-
+            {deleteError && (
+              <p className="mt-2 text-sm text-red-500">{deleteError}</p>
+            )}
             <div className="mt-4">
               <button
-                onClick={() => setIsDeleteModalOpen(false)}
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setDeleteError("");
+                }}
                 className="mr-2 cursor-pointer rounded-md bg-gray-500 p-2 text-white"
               >
                 Mégse

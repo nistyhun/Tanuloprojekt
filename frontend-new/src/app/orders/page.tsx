@@ -1,36 +1,35 @@
 "use client";
 
+import { getOrders } from "@/lib/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRequireAuth } from "../hooks/useRequireAuth";
 import { Order } from "../types/order";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersError, setOrdersError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const getAuthToken = useRequireAuth();
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
+    if (!token) return;
 
-    if (!token) {
-      return;
-    }
-
-    async function fetchOrders() {
-      const response = await fetch("http://localhost:8080/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-
-      if (!response.ok) {
-        return;
+    async function fetchOrders(authToken: string) {
+      try {
+        const data = await getOrders(authToken);
+        setOrders(data);
+        console.log(data);
+      } catch (error) {
+        console.error("A rendelések lekérési hibája:", error);
+        setOrdersError("Nem sikerült betölteni a rendeléseket.");
+      } finally {
+        setIsLoading(false);
       }
-
-      const data: Order[] = await response.json();
-      setOrders(data);
-      console.log(data);
     }
-    fetchOrders();
-  }, []);
+    fetchOrders(token);
+  }, [getAuthToken]);
 
   return (
     <main className="flex flex-col gap-4">
@@ -44,6 +43,8 @@ export default function OrdersPage() {
         </Link>
       </div>
       <p>Rendelések száma: {orders.length}</p>
+      {ordersError && <p className="text-sm text-red-500">{ordersError}</p>}
+      {isLoading && <p className="text-gray-500">Rendelések betöltése...</p>}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {orders.map((order) => (
           <article
