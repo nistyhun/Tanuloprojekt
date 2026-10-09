@@ -1,14 +1,15 @@
 package com.example.repository.order.dto
 
+import com.example.domain.category.Category
 import com.example.setup.plugin.serialization.LocalDateSerializer
-import com.example.repository.category.dto.CategoryResponse
+import com.example.domain.category.CategoryResponse
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
 @Serializable
 data class OrderDetailsResponse(
     val id: Int,
-    val category: CategoryResponse,
+    val category: Category,
     val customerName: String,
 
     @Serializable(with = LocalDateSerializer::class)
