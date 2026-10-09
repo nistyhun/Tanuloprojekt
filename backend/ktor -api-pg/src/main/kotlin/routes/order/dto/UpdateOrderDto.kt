@@ -1,11 +1,12 @@
-package com.example.repository.order.dto
+package com.example.routes.order.dto
 
+import com.example.domain.order.UpdateOrder
 import com.example.setup.plugin.serialization.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
 @Serializable
-data class UpdateOrderRequest(
+data class UpdateOrderDto(
     val categoryId: Int,
     val customerName: String,
 
@@ -14,5 +15,14 @@ data class UpdateOrderRequest(
 
     val quantity: Int,
     val publisherName: String
-
-    )
+) {
+    fun toEntity(): UpdateOrder {
+        return UpdateOrder(
+            categoryId = categoryId,
+            customerName = customerName,
+            deadline = deadline,
+            quantity = quantity,
+            publisherName = publisherName
+        )
+    }
+}

@@ -3,32 +3,27 @@ package com.example.domain.order
 import com.example.domain.exception.CategoryNotFoundException
 import com.example.domain.exception.OrderNotFoundException
 import com.example.domain.exception.ValidationException
-import com.example.repository.order.dto.CreateOrderRequest
-import com.example.repository.order.dto.OrderDetailsResponse
-import com.example.repository.order.dto.OrderResponse
-import com.example.repository.order.dto.PatchOrderRequest
-import com.example.repository.order.dto.UpdateOrderRequest
 import java.time.LocalDate
 
 class OrderService(
     private val orderRepository: OrderRepository
 ) {
 
-    fun getAllOrders(): List<OrderResponse> {
+    suspend fun getAllOrders(): List<Order> {
         return orderRepository.getAllOrders()
     }
 
-    fun getOrderById(id: Int): OrderDetailsResponse {
+    suspend fun getOrderById(id: Int): OrderDetails {
         return orderRepository.getOrderById(id)
             ?: throw OrderNotFoundException("Order not found")
     }
 
-    fun deleteOrderById(id: Int) {
+    suspend fun deleteOrderById(id: Int) {
         orderRepository.deleteOrderById(id)
             ?: throw OrderNotFoundException("Order not found")
     }
 
-    fun createOrder(request: CreateOrderRequest): OrderResponse {
+    suspend fun createOrder(request: CreateOrder): Order {
         if (!orderRepository.categoryExists(request.categoryId)) {
             throw CategoryNotFoundException("Category not found")
         }
@@ -52,7 +47,7 @@ class OrderService(
         return orderRepository.createOrder(request)
     }
 
-    fun updateOrder(id: Int, request: UpdateOrderRequest) {
+    suspend fun updateOrder(id: Int, request: UpdateOrder) {
         if (!orderRepository.categoryExists(request.categoryId)) {
             throw CategoryNotFoundException("Category not found")
         }
@@ -78,7 +73,7 @@ class OrderService(
         }
     }
 
-    fun patchOrder(id: Int, request: PatchOrderRequest) {
+    suspend fun patchOrder(id: Int, request: PatchOrder) {
         if (request.categoryId != null &&
             !orderRepository.categoryExists(request.categoryId)
         ) {

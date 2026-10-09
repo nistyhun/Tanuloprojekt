@@ -15,6 +15,7 @@ import com.example.setup.plugin.configureCors
 import com.example.setup.plugin.configureSerialization
 import com.example.setup.plugin.configureStatusPages
 import io.ktor.server.application.*
+import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -37,7 +38,9 @@ fun Application.module() {
     val adminEmail = config.property("admin.email").getString()
     val adminPassword = config.property("admin.password").getString()
 
-    seedDB(dbUserRepository, adminEmail, adminPassword)
+    runBlocking {
+        seedDB(dbUserRepository, adminEmail, adminPassword)
+    }
 
     val dbOrderRepository = DbOrderRepository()
     val orderService = OrderService(dbOrderRepository)

@@ -2,10 +2,7 @@ package com.example.domain.auth
 
 import com.example.domain.exception.InvalidCredentialsException
 import com.example.domain.exception.ValidationException
-import com.example.repository.user.dto.LoginRequest
-import com.example.repository.user.dto.LoginResponse
-import com.example.repository.user.dto.RegisterRequest
-import com.example.repository.user.dto.UserResponse
+import com.example.domain.user.User
 import com.example.setup.plugin.auth.JwtConfig
 
 class AuthService(
@@ -13,7 +10,7 @@ class AuthService(
     private val jwtConfig: JwtConfig
 ) {
 
-    fun register(request: RegisterRequest): UserResponse {
+    suspend fun register(request: RegisterUser): User {
         if (request.firstName.isBlank()) {
             throw ValidationException("First name cannot be blank")
         }
@@ -27,7 +24,7 @@ class AuthService(
         validateEmail(email)
         validatePassword(request.password)
 
-        if (authRepository.emailExists(request.email)) {
+        if (authRepository.emailExists(email)) {
             throw ValidationException("Email already exists")
         }
 
@@ -48,17 +45,10 @@ class AuthService(
             roleId = roleId
         )
 
-        return UserResponse(
-            id = user.id,
-            firstName = user.firstName,
-            lastName = user.lastName,
-            email = user.email,
-            role = user.role,
-            createdAt = user.createdAt
-        )
+        return user
     }
 
-    fun login(request: LoginRequest): LoginResponse {
+    suspend fun login(request: LoginUser): LoginResult {
         val email = request.email.trim().lowercase()
 
         val user = authRepository.getUserByEmail(email)
@@ -79,33 +69,15 @@ class AuthService(
             role = user.role
         )
 
-        val userResponse = UserResponse(
-            id = user.id,
-            firstName = user.firstName,
-            lastName = user.lastName,
-            email = user.email,
-            role = user.role,
-            createdAt = user.createdAt
-        )
-
-        return LoginResponse(
+        return LoginResult(
             token = token,
-            user = userResponse
+            user = user
         )
     }
 
-    fun getCurrentUser(userId: Int): UserResponse {
-        val user = authRepository.getUserById(userId)
+    suspend fun getCurrentUser(userId: Int): User {
+        return authRepository.getUserById(userId)
             ?: throw ValidationException("User not found")
-
-        return UserResponse(
-            id = user.id,
-            firstName = user.firstName,
-            lastName = user.lastName,
-            email = user.email,
-            role = user.role,
-            createdAt = user.createdAt
-        )
     }
 
     private fun validateEmail(email: String) {
@@ -118,7 +90,7 @@ class AuthService(
         }
     }
 
-    private fun validatePassword(password: String) {
+     private fun validatePassword(password: String) {
         if (password.length < 8) {
             throw ValidationException(
                 "Password must be at least 8 characters long"

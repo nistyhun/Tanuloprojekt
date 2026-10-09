@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthError } from "@/app/hooks/useAuthError";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { Category, CreateOrder } from "@/app/types/order";
 import OrderForm from "@/components/orders/OrderForm";
@@ -27,6 +28,9 @@ export default function CreateOrderPage() {
   const [submitError, setSubmitError] = useState("");
   const [categoriesError, setCategoriesError] = useState("");
   const getAuthToken = useRequireAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleAuthError = useAuthError();
 
   useEffect(() => {
     const token = getAuthToken();
@@ -38,12 +42,17 @@ export default function CreateOrderPage() {
       try {
         const data = await getCategories(authToken);
         setCategories(data);
-      } catch {
+      } catch (error) {
+        if (handleAuthError(error)) {
+          return;
+        }
         setCategoriesError("Nem sikerült betölteni a kategóriákat.");
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchCategories(token);
-  }, [getAuthToken]);
+  }, [handleAuthError, getAuthToken]);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,56 +90,76 @@ export default function CreateOrderPage() {
     }
 
     setSubmitError("");
+    setIsSubmitting(true);
 
     try {
       await createOrder(newOrder, token);
       router.push("/orders");
     } catch (error) {
+      if (handleAuthError(error)) {
+        return;
+      }
       console.error("Rendelés mentési hiba", error);
       setSubmitError(
         error instanceof Error ? error.message : "Ismeretlen hiba történt.",
       );
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <OrderForm
-            title="Új rendelés rögzítése"
-            customerName={customerName}
-            onCustomerNameChange={setCustomerName}
-            publisherName={publisherName}
-            onPublisherNameChange={setPublisherName}
-            categories={categories}
-            categoryId={categoryId}
-            onCategoryChange={setCategoryId}
-            deadline={deadline}
-            onDeadlineChange={setDeadline}
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            errors={errors}
-          ></OrderForm>
-          {categoriesError && (
-            <p className="text-sm text-red-500">{categoriesError}</p>
-          )}
-          <div className="mt-2">
-            <button
-              type="submit"
-              className="rounded-md bg-blue-500 p-2 text-white mr-2"
-            >
-              Rögzítés
-            </button>
-            <Link
-              href={"/orders"}
-              className="rounded-md bg-gray-500 text-white p-2"
-            >
-              Vissza
-            </Link>
-          </div>
-          {submitError && <p className="text-sm text-red-500">{submitError}</p>}
-        </form>
+        {isLoading && <p>Kategóriák betöltése...</p>}
+        {categoriesError && (
+          <p className="text-sm text-red-500">{categoriesError}</p>
+        )}
+        {!categoriesError && !isLoading && (
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <OrderForm
+              title="Új rendelés rögzítése"
+              customerName={customerName}
+              onCustomerNameChange={setCustomerName}
+              publisherName={publisherName}
+              onPublisherNameChange={setPublisherName}
+              categories={categories}
+              categoryId={categoryId}
+              onCategoryChange={setCategoryId}
+              deadline={deadline}
+              onDeadlineChange={setDeadline}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              errors={errors}
+            ></OrderForm>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-md bg-blue-500 p-2 text-white"
+              >
+                {isSubmitting ? "Rögzítés..." : "Rögzítés"}
+              </button>
+              <Link
+                href="/orders"
+                className="rounded-md bg-gray-500 p-2 text-white"
+              >
+                Vissza
+              </Link>
+            </div>
+            {submitError && (
+              <p className="text-sm text-red-500">{submitError}</p>
+            )}
+          </form>
+        )}
+        {categoriesError && (
+          <Link
+            href={"/orders"}
+            className="mt-2 inline-block rounded-md bg-gray-500 p-2 text-white"
+          >
+            Vissza
+          </Link>
+        )}
       </section>
     </main>
   );

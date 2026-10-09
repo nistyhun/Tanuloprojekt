@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthError } from "@/app/hooks/useAuthError";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { Category, UpdateOrder } from "@/app/types/order";
 import OrderForm from "@/components/orders/OrderForm";
@@ -29,6 +30,10 @@ export default function EditOrderPage() {
   const [orderError, setOrderError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const getAuthToken = useRequireAuth();
+  const [isOrderLoading, setIsOrderLoading] = useState(true);
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleAuthError = useAuthError();
 
   useEffect(() => {
     const token = getAuthToken();
@@ -47,8 +52,13 @@ export default function EditOrderPage() {
         setQuantity(data.quantity);
         setCategoryId(data.category.id);
       } catch (error) {
+        if (handleAuthError(error)) {
+          return;
+        }
         console.error("A rendelés lekérési hibája:", error);
         setOrderError("Nem sikerült betölteni a rendelés adatait.");
+      } finally {
+        setIsOrderLoading(false);
       }
     }
 
@@ -56,8 +66,13 @@ export default function EditOrderPage() {
       try {
         const data = await getCategories(authToken);
         setCategories(data);
-      } catch {
+      } catch (error) {
+        if (handleAuthError(error)) {
+          return;
+        }
         setCategoriesError("Nem sikerült betölteni a kategóriákat.");
+      } finally {
+        setIsCategoriesLoading(false);
       }
     }
 
@@ -69,7 +84,7 @@ export default function EditOrderPage() {
 
     fetchOrderDetails(id, token);
     fetchCategories(token);
-  }, [getAuthToken, params.id]);
+  }, [handleAuthError, getAuthToken, params.id]);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -77,6 +92,12 @@ export default function EditOrderPage() {
     const token = getAuthToken();
 
     if (!token) {
+      return;
+    }
+
+    const id = params.id;
+
+    if (typeof id !== "string") {
       return;
     }
 
@@ -96,6 +117,9 @@ export default function EditOrderPage() {
       return;
     }
 
+    setSubmitError("");
+    setIsSubmitting(true);
+
     const updatedOrder: UpdateOrder = {
       categoryId,
       customerName,
@@ -107,56 +131,74 @@ export default function EditOrderPage() {
     console.log(updatedOrder);
 
     try {
-      await updateOrder(`${params.id}`, updatedOrder, token);
+      await updateOrder(id, updatedOrder, token);
       console.log("Sikeres módosítás");
-      router.push(`/orders/${params.id}`);
+      router.push(`/orders/${id}`);
     } catch (error) {
+      if (handleAuthError(error)) {
+        return;
+      }
       console.error("A rendelés módosítása sikertelen:", error);
       setSubmitError(
         error instanceof Error ? error.message : "Ismeretlen hiba történt.",
       );
+    } finally {
+      setIsSubmitting(false);
     }
   }
+  const isLoading = isOrderLoading || isCategoriesLoading;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <form onSubmit={handleSubmit}>
-          <OrderForm
-            title="Rendelés szerkesztése"
-            customerName={customerName}
-            onCustomerNameChange={setCustomerName}
-            publisherName={publisherName}
-            onPublisherNameChange={setPublisherName}
-            categories={categories}
-            categoryId={categoryId}
-            onCategoryChange={setCategoryId}
-            deadline={deadline}
-            onDeadlineChange={setDeadline}
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            errors={errors}
-          ></OrderForm>
-          {categoriesError && (
-            <p className="text-sm text-red-500">{categoriesError}</p>
-          )}
-          {orderError && <p className="text-sm text-red-500">{orderError}</p>}
-          {submitError && <p className="text-sm text-red-500">{submitError}</p>}
-          <div className="mt-2">
-            <button
-              type="submit"
-              className="rounded-md bg-blue-500 text-white p-2 mr-2"
-            >
-              Rögzítés
-            </button>
-            <Link
-              href={`/orders/${params.id}`}
-              className="rounded-md bg-gray-500 text-white p-2"
-            >
-              Vissza
-            </Link>
-          </div>
-        </form>
+        {isLoading && (
+          <>
+            {isCategoriesLoading && <p>Kategóriák betöltése...</p>}
+            {isOrderLoading && <p>Rendelés betöltése...</p>}
+          </>
+        )}
+        {!isLoading && !orderError && !categoriesError && (
+          <form onSubmit={handleSubmit}>
+            <OrderForm
+              title="Rendelés szerkesztése"
+              customerName={customerName}
+              onCustomerNameChange={setCustomerName}
+              publisherName={publisherName}
+              onPublisherNameChange={setPublisherName}
+              categories={categories}
+              categoryId={categoryId}
+              onCategoryChange={setCategoryId}
+              deadline={deadline}
+              onDeadlineChange={setDeadline}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              errors={errors}
+            ></OrderForm>
+
+            {submitError && (
+              <p className="text-sm text-red-500">{submitError}</p>
+            )}
+            <div className="mt-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-md bg-blue-500 text-white p-2 mr-2"
+              >
+                {isSubmitting ? "Rögzítés..." : "Rögzítés"}
+              </button>
+              <Link
+                href={`/orders/${params.id}`}
+                className="rounded-md bg-gray-500 text-white p-2"
+              >
+                Vissza
+              </Link>
+            </div>
+          </form>
+        )}
+        {orderError && <p className="text-sm text-red-500">{orderError}</p>}
+        {categoriesError && (
+          <p className="text-sm text-red-500">{categoriesError}</p>
+        )}
       </section>
     </main>
   );

@@ -1,23 +1,17 @@
 package com.example.domain.order
 
-import com.example.repository.order.dto.CreateOrderRequest
-import com.example.repository.order.dto.OrderDetailsResponse
-import com.example.repository.order.dto.OrderResponse
-import com.example.repository.order.dto.PatchOrderRequest
-import com.example.repository.order.dto.UpdateOrderRequest
-
 interface OrderRepository {
-    fun getAllOrders(): List<OrderResponse>
+    suspend fun getAllOrders(): List<Order>
 
-    fun getOrderById(id: Int): OrderDetailsResponse?
+    suspend fun getOrderById(id: Int): OrderDetails?
 
-    fun deleteOrderById(id: Int): Int?
+    suspend fun deleteOrderById(id: Int): Int?
 
-    fun categoryExists(id: Int): Boolean
+    suspend fun categoryExists(id: Int): Boolean
 
-    fun createOrder(request: CreateOrderRequest): OrderResponse
+    suspend fun createOrder(request: CreateOrder): Order
 
-    fun updateOrder(id: Int, request: UpdateOrderRequest): Int
+    suspend fun updateOrder(id: Int, request: UpdateOrder): Int
 
-    fun patchOrder(id: Int, request: PatchOrderRequest): Int
+    suspend fun patchOrder(id: Int, request: PatchOrder): Int
 }

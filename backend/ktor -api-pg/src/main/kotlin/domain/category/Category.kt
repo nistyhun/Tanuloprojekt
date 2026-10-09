@@ -1,9 +1,6 @@
-package com.example.repository.category.dto
+package com.example.domain.category
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class CategoryResponse(
+data class Category(
     val id: Int,
     val type: String
 )

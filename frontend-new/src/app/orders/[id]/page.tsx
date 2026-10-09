@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthError } from "@/app/hooks/useAuthError";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { OrderDetails } from "@/app/types/order";
 import { deleteOrder, getOrderById } from "@/lib/api";
@@ -15,6 +16,9 @@ export default function OrderDetailsPage() {
   const [deleteError, setDeleteError] = useState("");
   const [orderError, setOrderError] = useState("");
   const getAuthToken = useRequireAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const handleAuthError = useAuthError();
 
   async function handleDelete() {
     const token = getAuthToken();
@@ -23,13 +27,19 @@ export default function OrderDetailsPage() {
       return;
     }
     setDeleteError("");
+    setIsDeleting(true);
     try {
       await deleteOrder(id, token);
       setIsDeleteModalOpen(false);
       router.push("/orders");
     } catch (error) {
+      if (handleAuthError(error)) {
+        return;
+      }
       console.error("A rendelés törlése sikertelen:", error);
       setDeleteError("Nem sikerült törölni a rendelést.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -47,50 +57,64 @@ export default function OrderDetailsPage() {
         setOrder(data);
         console.log(data);
       } catch (error) {
+        if (handleAuthError(error)) {
+          return;
+        }
         console.error("A rendelés lekérési hibája:", error);
         setOrderError("Nem sikerült betölteni a rendelést.");
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchOrder(id, token);
-  }, [getAuthToken, params.id]);
+  }, [handleAuthError, getAuthToken, params.id]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
         <h2 className="mb-6 text-2xl font-semibold">Rendelés részletei</h2>
+        {isLoading && <p className="mb-4 text-sm">Rendelés betöltése...</p>}
         {orderError && (
-          <p className="mb-4 text-sm text-red-500">{orderError}</p>
+          <>
+            <p className="mb-4 text-sm text-red-500">{orderError}</p>
+            <Link
+              href={"/orders"}
+              className="cursor-pointer rounded-md bg-gray-500 text-white p-2"
+            >
+              Vissza
+            </Link>
+          </>
         )}
-        <p>Rendelés id: {params.id}</p>
         {order && (
           <>
+            <p>Rendelés id: {params.id}</p>
             <p>Megrendelő: {order.customerName}</p>
             <p>Kiadó: {order.publisherName}</p>
             <p>Kategória: {order.category.type}</p>
             <p>Határidő: {order.deadline}</p>
             <p>Mennyiség: {order.quantity} db</p>
+            <div className="mt-2">
+              <Link
+                href={`/orders/${params.id}/edit`}
+                className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white"
+              >
+                Szerkesztés
+              </Link>
+              <button
+                className="mr-2 cursor-pointer rounded-md bg-red-500 p-2 text-white"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                Törlés
+              </button>
+              <Link
+                href={"/orders"}
+                className="cursor-pointer rounded-md bg-gray-500 text-white p-2"
+              >
+                Vissza
+              </Link>
+            </div>
           </>
         )}
-        <div className="mt-2">
-          <Link
-            href={`/orders/${params.id}/edit`}
-            className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white"
-          >
-            Szerkesztés
-          </Link>
-          <button
-            className="mr-2 cursor-pointer rounded-md bg-red-500 p-2 text-white"
-            onClick={() => setIsDeleteModalOpen(true)}
-          >
-            Törlés
-          </button>
-          <Link
-            href={"/orders"}
-            className="cursor-pointer rounded-md bg-gray-500 text-white p-2"
-          >
-            Vissza
-          </Link>
-        </div>
       </section>
       {isDeleteModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50">
@@ -107,6 +131,7 @@ export default function OrderDetailsPage() {
                   setIsDeleteModalOpen(false);
                   setDeleteError("");
                 }}
+                disabled={isDeleting}
                 className="mr-2 cursor-pointer rounded-md bg-gray-500 p-2 text-white"
               >
                 Mégse
@@ -115,8 +140,9 @@ export default function OrderDetailsPage() {
               <button
                 onClick={handleDelete}
                 className="cursor-pointer rounded-md bg-red-500 p-2 text-white"
+                disabled={isDeleting}
               >
-                Törlés
+                {isDeleting ? "Törlés..." : "Törlés"}
               </button>
             </div>
           </div>

@@ -1,7 +1,7 @@
 package com.example.repository.user
 
 import com.example.domain.auth.AuthRepository
-import com.example.repository.user.dto.RegisterRequest
+import com.example.domain.auth.RegisterUser
 import com.example.domain.user.User
 import com.example.repository.rest.DbRestRepository
 import com.example.repository.role.RoleTable
@@ -12,7 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class DbUserRepository : DbRestRepository(UserTable), AuthRepository {
 
-    override fun emailExists(email: String): Boolean {
+    override suspend fun emailExists(email: String): Boolean {
         return transaction {
             UserTable
                 .selectAll()
@@ -21,7 +21,7 @@ class DbUserRepository : DbRestRepository(UserTable), AuthRepository {
         }
     }
 
-    override fun getRoleByName(role: String): Int? {
+    override suspend fun getRoleByName(role: String): Int? {
         return transaction {
             val result = RoleTable
                 .selectAll()
@@ -32,7 +32,7 @@ class DbUserRepository : DbRestRepository(UserTable), AuthRepository {
         }
     }
 
-    override fun getUserByEmail(email: String): User? {
+    override suspend fun getUserByEmail(email: String): User? {
         return transaction {
             val user = (UserTable innerJoin RoleTable)
                 .selectAll()
@@ -55,8 +55,8 @@ class DbUserRepository : DbRestRepository(UserTable), AuthRepository {
         }
     }
 
-    override fun createUser(
-        request: RegisterRequest,
+    override suspend fun createUser(
+        request: RegisterUser,
         passwordHash: String,
         roleId: Int
     ): User {
@@ -91,7 +91,7 @@ class DbUserRepository : DbRestRepository(UserTable), AuthRepository {
         }
     }
 
-    override fun getUserById(userId: Int): User? {
+    override suspend fun getUserById(userId: Int): User? {
         return transaction {
             val user = (UserTable innerJoin RoleTable)
                 .selectAll()

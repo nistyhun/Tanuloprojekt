@@ -1,11 +1,14 @@
 package com.example.routes.order
 
 import com.example.domain.exception.ValidationException
-import com.example.repository.order.dto.CreateOrderRequest
-import com.example.repository.order.dto.PatchOrderRequest
-import com.example.repository.order.dto.UpdateOrderRequest
+import com.example.routes.order.dto.CreateOrderDto
+import com.example.routes.order.dto.PatchOrderDto
+import com.example.routes.order.dto.UpdateOrderDto
 import com.example.setup.plugin.auth.requireRole
 import com.example.domain.order.OrderService
+import com.example.routes.order.dto.OrderDetailsDto
+import com.example.routes.order.dto.OrderListDto
+import com.example.routes.order.dto.OrderDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
@@ -22,14 +25,14 @@ fun Route.configureOrderRoutes(orderService: OrderService) {
 
     get("/orders") {
         val orders = orderService.getAllOrders()
-        call.respond(orders)
+        call.respond(OrderListDto.fromEntity(orders))
     }
     get("/orders/{id}") {
         val id = call.parameters["id"]?.toIntOrNull() ?: throw ValidationException("Invalid order id")
 
         val order = orderService.getOrderById(id)
 
-        call.respond(HttpStatusCode.OK, order)
+        call.respond(HttpStatusCode.OK, OrderDetailsDto.fromEntity(order))
     }
     delete("/orders/{id}") {
         call.requireRole(adminRole)
@@ -41,12 +44,16 @@ fun Route.configureOrderRoutes(orderService: OrderService) {
     }
     post("/orders") {
         call.requireRole(adminRole)
-        val request = call.receiveNullable<CreateOrderRequest>()
+
+        val request = call.receiveNullable<CreateOrderDto>()
             ?: throw ValidationException("Invalid request body")
 
-        val newOrder = orderService.createOrder(request)
+        val newOrder = orderService.createOrder(request.toEntity())
 
-        call.respond(HttpStatusCode.Created, newOrder)
+        call.respond(
+            HttpStatusCode.Created,
+            OrderDto.fromEntity(newOrder)
+        )
     }
 
     put("/orders/{id}") {
@@ -54,10 +61,10 @@ fun Route.configureOrderRoutes(orderService: OrderService) {
         val id = call.parameters["id"]?.toIntOrNull()
             ?: throw ValidationException("Invalid order id")
 
-        val request = call.receiveNullable<UpdateOrderRequest>()
+        val request = call.receiveNullable<UpdateOrderDto>()
             ?: throw ValidationException("Invalid request body")
 
-        orderService.updateOrder(id, request)
+        orderService.updateOrder(id, request.toEntity())
 
         call.respond(
             HttpStatusCode.OK,
@@ -70,10 +77,10 @@ fun Route.configureOrderRoutes(orderService: OrderService) {
         val id = call.parameters["id"]?.toIntOrNull()
             ?: throw ValidationException("Invalid order id")
 
-        val request = call.receiveNullable<PatchOrderRequest>()
+        val request = call.receiveNullable<PatchOrderDto>()
             ?: throw ValidationException("Invalid request body")
 
-        orderService.patchOrder(id, request)
+        orderService.patchOrder(id, request.toEntity())
 
         call.respond(
             HttpStatusCode.OK,

@@ -4,15 +4,13 @@ import com.example.domain.category.Category
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CategoryDto(
-    val id: Int,
-    val type: String,
+data class CategoryListDto(
+    val categories: List<CategoryDto>,
 ) {
     companion object {
-        fun fromEntity(category: Category): CategoryDto {
-            return CategoryDto(
-                id = category.id,
-                type = category.type,
+        fun fromEntity(categories: List<Category>): CategoryListDto {
+            return CategoryListDto(
+                categories = categories.map { CategoryDto.fromEntity(it) }
             )
         }
     }

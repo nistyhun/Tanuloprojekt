@@ -8,12 +8,12 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.LocalDate
 import kotlin.random.Random
-import com.example.repository.user.dto.RegisterRequest
+import com.example.domain.auth.RegisterUser
 import com.example.repository.category.CategoryTable
 import com.example.repository.order.OrderTable
 import java.time.LocalDateTime
 
-fun seedDB(dbUserRepository:
+suspend fun seedDB(dbUserRepository:
            DbUserRepository,
            adminEmail: String,
            adminPassword: String) {
@@ -56,7 +56,7 @@ fun seedDB(dbUserRepository:
     seedAdmin(dbUserRepository, adminEmail, adminPassword)
 }
 
-private fun seedAdmin(
+private suspend fun seedAdmin(
     dbUserRepository: DbUserRepository,
     adminEmail: String,
     adminPassword: String) {
@@ -70,7 +70,7 @@ private fun seedAdmin(
 
     val passwordHash = PasswordHasher.hash(adminPassword)
 
-    val request = RegisterRequest(
+    val request = RegisterUser(
         firstName = "System",
         lastName = "Admin",
         email = adminEmail,

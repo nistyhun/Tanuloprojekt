@@ -5,8 +5,17 @@ import type {
   OrderDetails,
   UpdateOrder,
 } from "@/app/types/order";
+import { deleteToken } from "./auth";
+import { UnauthorizedError } from "./error";
 
 export const API_BASE_URL = "http://localhost:8080";
+
+function handleUnauthorized(response: Response) {
+  if (response.status === 401) {
+    deleteToken();
+    throw new UnauthorizedError();
+  }
+}
 
 export async function getCategories(token: string): Promise<Category[]> {
   const response = await fetch(`${API_BASE_URL}/categories`, {
@@ -14,6 +23,7 @@ export async function getCategories(token: string): Promise<Category[]> {
       Authorization: `Bearer ${token}`,
     },
   });
+  handleUnauthorized(response);
   if (!response.ok) {
     throw new Error("Nem sikerült lekérni a kategóriákat.");
   }
@@ -29,6 +39,7 @@ export async function getOrderById(
       Authorization: `Bearer ${token}`,
     },
   });
+  handleUnauthorized(response);
   if (!response.ok) {
     throw new Error("Nem sikerült lekérni a rendelést.");
   }
@@ -42,6 +53,7 @@ export async function getOrders(token: string): Promise<Order[]> {
       Authorization: `Bearer ${token}`,
     },
   });
+  handleUnauthorized(response);
   if (!response.ok) {
     throw new Error("Nem sikerült lekérni a rendeléseket.");
   }
@@ -57,6 +69,7 @@ export async function createOrder(order: CreateOrder, token: string) {
     },
     body: JSON.stringify(order),
   });
+  handleUnauthorized(response);
   if (!response.ok) {
     throw new Error("A rendelés mentése sikertelen.");
   }
@@ -75,6 +88,7 @@ export async function updateOrder(
     },
     body: JSON.stringify(order),
   });
+  handleUnauthorized(response);
   if (!response.ok) {
     throw new Error("A rendelés módosítása sikertelen.");
   }
@@ -87,6 +101,7 @@ export async function deleteOrder(id: string, token: string) {
       Authorization: `Bearer ${token}`,
     },
   });
+  handleUnauthorized(response);
   if (!response.ok) {
     throw new Error("A rendelés törlése sikertelen.");
   }

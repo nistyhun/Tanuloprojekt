@@ -3,6 +3,7 @@
 import { getOrders } from "@/lib/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuthError } from "../hooks/useAuthError";
 import { useRequireAuth } from "../hooks/useRequireAuth";
 import { Order } from "../types/order";
 
@@ -11,6 +12,7 @@ export default function OrdersPage() {
   const [ordersError, setOrdersError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const getAuthToken = useRequireAuth();
+  const handleAuthError = useAuthError();
 
   useEffect(() => {
     const token = getAuthToken();
@@ -22,6 +24,9 @@ export default function OrdersPage() {
         setOrders(data);
         console.log(data);
       } catch (error) {
+        if (handleAuthError(error)) {
+          return;
+        }
         console.error("A rendelések lekérési hibája:", error);
         setOrdersError("Nem sikerült betölteni a rendeléseket.");
       } finally {
@@ -29,7 +34,7 @@ export default function OrdersPage() {
       }
     }
     fetchOrders(token);
-  }, [getAuthToken]);
+  }, [handleAuthError, getAuthToken]);
 
   return (
     <main className="flex flex-col gap-4">
@@ -42,7 +47,7 @@ export default function OrdersPage() {
           Új rendelés
         </Link>
       </div>
-      <p>Rendelések száma: {orders.length}</p>
+      {!ordersError && !isLoading && <p>Rendelések száma: {orders.length}</p>}
       {ordersError && <p className="text-sm text-red-500">{ordersError}</p>}
       {isLoading && <p className="text-gray-500">Rendelések betöltése...</p>}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

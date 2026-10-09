@@ -1,14 +1,14 @@
 package com.example.repository.order
 
-import com.example.repository.order.dto.CreateOrderRequest
-import com.example.repository.order.dto.OrderDetailsResponse
-import com.example.repository.order.dto.OrderResponse
-import com.example.repository.order.dto.PatchOrderRequest
-import com.example.repository.order.dto.UpdateOrderRequest
+import com.example.domain.category.Category
+import com.example.domain.order.CreateOrder
 import com.example.repository.category.CategoryTable
 import com.example.repository.rest.DbRestRepository
-import com.example.repository.category.dto.CategoryResponse
+import com.example.domain.order.Order
+import com.example.domain.order.OrderDetails
 import com.example.domain.order.OrderRepository
+import com.example.domain.order.PatchOrder
+import com.example.domain.order.UpdateOrder
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -20,10 +20,10 @@ class DbOrderRepository:
     DbRestRepository(OrderTable),
     OrderRepository {
 
-    override fun getAllOrders(): List<OrderResponse> {
+    override suspend fun getAllOrders(): List<Order> {
         return transaction {
             OrderTable.selectAll().map { row ->
-                OrderResponse(
+                Order(
                     id = row[OrderTable.id].value,
                     categoryId = row[OrderTable.categoryId].value,
                     customerName = row[OrderTable.customerName],
@@ -35,7 +35,7 @@ class DbOrderRepository:
         }
     }
 
-    override fun getOrderById(id: Int): OrderDetailsResponse? {
+    override suspend fun getOrderById(id: Int): OrderDetails? {
         return transaction {
             val order = (OrderTable innerJoin CategoryTable)
                 .selectAll()
@@ -46,9 +46,9 @@ class DbOrderRepository:
                 return@transaction null
             }
 
-            OrderDetailsResponse(
+            OrderDetails(
                 id = order[OrderTable.id].value,
-                category = CategoryResponse(
+                category = Category(
                     id = order[CategoryTable.id].value,
                     type = order[CategoryTable.type]
                 ),
@@ -60,7 +60,7 @@ class DbOrderRepository:
         }
     }
 
-    override fun deleteOrderById(id: Int): Int? {
+    override suspend fun deleteOrderById(id: Int): Int? {
         return transaction {
             val order = OrderTable
                 .selectAll()
@@ -75,7 +75,7 @@ class DbOrderRepository:
         }
     }
 
-    override fun categoryExists(id: Int): Boolean {
+    override suspend fun categoryExists(id: Int): Boolean {
         return transaction {
             CategoryTable
                 .selectAll()
@@ -84,7 +84,7 @@ class DbOrderRepository:
         }
     }
 
-    override fun createOrder(request: CreateOrderRequest): OrderResponse {
+    override suspend fun createOrder(request: CreateOrder): Order {
         return transaction {
             val newOrder = OrderTable.insert {
                 it[categoryId] = request.categoryId
@@ -95,7 +95,7 @@ class DbOrderRepository:
                 setCreatedTimestamps(it)
             }
 
-            OrderResponse(
+            Order(
                 id = newOrder[OrderTable.id].value,
                 categoryId = request.categoryId,
                 customerName = request.customerName.trim(),
@@ -106,7 +106,7 @@ class DbOrderRepository:
         }
     }
 
-    override fun updateOrder(id: Int, request: UpdateOrderRequest): Int {
+    override suspend fun updateOrder(id: Int, request: UpdateOrder): Int {
         return transaction {
             OrderTable.update({ OrderTable.id eq id }) {
                 it[categoryId] = request.categoryId
@@ -119,7 +119,7 @@ class DbOrderRepository:
         }
     }
 
-    override fun patchOrder(id: Int, request: PatchOrderRequest): Int {
+    override suspend fun patchOrder(id: Int, request: PatchOrder): Int {
         return transaction {
             OrderTable.update({ OrderTable.id eq id }) {
                 if (request.categoryId != null) {
