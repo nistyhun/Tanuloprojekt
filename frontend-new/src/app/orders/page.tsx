@@ -1,51 +1,20 @@
 "use client";
 
-import { getOrders } from "@/lib/api";
+import { ButtonLink } from "@/components/ui/button";
+import { useOrders } from "@/feature/orders/list/useOrders";
+import { routes } from "@/lib/routes";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useAuthError } from "../hooks/useAuthError";
-import { useRequireAuth } from "../hooks/useRequireAuth";
-import { Order } from "../types/order";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [ordersError, setOrdersError] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const getAuthToken = useRequireAuth();
-  const handleAuthError = useAuthError();
-
-  useEffect(() => {
-    const token = getAuthToken();
-    if (!token) return;
-
-    async function fetchOrders(authToken: string) {
-      try {
-        const data = await getOrders(authToken);
-        setOrders(data);
-        console.log(data);
-      } catch (error) {
-        if (handleAuthError(error)) {
-          return;
-        }
-        console.error("A rendelések lekérési hibája:", error);
-        setOrdersError("Nem sikerült betölteni a rendeléseket.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchOrders(token);
-  }, [handleAuthError, getAuthToken]);
+  const { orders, ordersError, isLoading } = useOrders();
 
   return (
-    <main className="flex flex-col gap-4">
+    <main className="flex flex-col gap-4 bg-gray-100 p-4">
       <div className="flex items-center justify-between mt-2">
         <h1>Rendelések</h1>
-        <Link
-          href={"/orders/new"}
-          className="cursor-pointer rounded-md bg-blue-600 p-2 text-white"
-        >
+        <ButtonLink variant="primary" href={routes.orderNew}>
           Új rendelés
-        </Link>
+        </ButtonLink>
       </div>
       {!ordersError && !isLoading && <p>Rendelések száma: {orders.length}</p>}
       {ordersError && <p className="text-sm text-red-500">{ordersError}</p>}
@@ -64,7 +33,10 @@ export default function OrdersPage() {
             <p className="text-sm">Mennyiség: {order.quantity} db</p>
             <p className="text-sm">
               Részletek:{" "}
-              <Link className="text-blue-500" href={`/orders/${order.id}`}>
+              <Link
+                className="text-blue-500"
+                href={routes.orderDetails(String(order.id))}
+              >
                 Link
               </Link>
             </p>

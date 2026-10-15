@@ -3,7 +3,8 @@
 import { useAuthError } from "@/app/hooks/useAuthError";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { OrderDetails } from "@/app/types/order";
-import { deleteOrder, getOrderById } from "@/lib/api";
+import { routes } from "@/lib/routes";
+import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -29,9 +30,9 @@ export default function OrderDetailsPage() {
     setDeleteError("");
     setIsDeleting(true);
     try {
-      await deleteOrder(id, token);
+      await new RemoteOrderRepository().deleteOrder(id);
       setIsDeleteModalOpen(false);
-      router.push("/orders");
+      router.push(routes.orders);
     } catch (error) {
       if (handleAuthError(error)) {
         return;
@@ -51,11 +52,10 @@ export default function OrderDetailsPage() {
       return;
     }
 
-    async function fetchOrder(orderId: string, authToken: string) {
+    async function fetchOrder(orderId: string) {
       try {
-        const data = await getOrderById(orderId, authToken);
+        const data = await new RemoteOrderRepository().getOrderById(orderId);
         setOrder(data);
-        console.log(data);
       } catch (error) {
         if (handleAuthError(error)) {
           return;
@@ -66,7 +66,7 @@ export default function OrderDetailsPage() {
         setIsLoading(false);
       }
     }
-    fetchOrder(id, token);
+    fetchOrder(id);
   }, [handleAuthError, getAuthToken, params.id]);
 
   return (
@@ -95,7 +95,7 @@ export default function OrderDetailsPage() {
             <p>Mennyiség: {order.quantity} db</p>
             <div className="mt-2">
               <Link
-                href={`/orders/${params.id}/edit`}
+                href={routes.orderEdit(String(params.id))}
                 className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white"
               >
                 Szerkesztés
@@ -107,7 +107,7 @@ export default function OrderDetailsPage() {
                 Törlés
               </button>
               <Link
-                href={"/orders"}
+                href={routes.orders}
                 className="cursor-pointer rounded-md bg-gray-500 text-white p-2"
               >
                 Vissza
