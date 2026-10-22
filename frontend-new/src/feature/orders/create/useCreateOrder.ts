@@ -61,6 +61,8 @@ export const useCreateOrder = () => {
   });
 
   useEffect(() => {
+    let ignore = false;
+
     const token = getAuthToken();
 
     if (!token) {
@@ -70,17 +72,28 @@ export const useCreateOrder = () => {
     async function fetchCategories() {
       try {
         const data = await new RemoteCategoryRepository().getCategories();
+
+        if (ignore) return;
+
         setCategories(data);
       } catch (error) {
+        if (ignore) return;
+
         if (handleAuthError(error)) {
           return;
         }
-        setCategoriesError("Nem sikerült betölteni a ketegóriákat.");
+        setCategoriesError("Nem sikerült betölteni a kategóriákat.");
       } finally {
-        setIsLoading(false);
+        if (!ignore) {
+          setIsLoading(false);
+        }
       }
     }
     fetchCategories();
+
+    return () => {
+      ignore = true;
+    };
   }, [getAuthToken, handleAuthError]);
 
   return {

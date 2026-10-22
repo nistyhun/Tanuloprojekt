@@ -17,24 +17,24 @@ export const useOrders = () => {
   useEffect(() => {
     if (!getAuthToken()) return;
 
-    let cancelled = false;
+    let ignore = false;
 
     const fetchOrders = async () => {
       try {
         const data = await new RemoteOrderRepository().getOrders();
 
-        if (!cancelled) {
+        if (!ignore) {
           setOrders(data);
         }
       } catch (error) {
-        if (cancelled) return;
+        if (ignore) return;
 
         if (handleAuthError(error)) return;
 
         console.error("A rendelések lekérési hibája:", error);
         setOrdersError("Nem sikerült betölteni a rendeléseket.");
       } finally {
-        if (!cancelled) {
+        if (!ignore) {
           setIsLoading(false);
         }
       }
@@ -43,7 +43,7 @@ export const useOrders = () => {
     void fetchOrders();
 
     return () => {
-      cancelled = true;
+      ignore = true;
     };
   }, [getAuthToken, handleAuthError]);
 

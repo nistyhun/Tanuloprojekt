@@ -24,10 +24,13 @@ export const useLogin = () => {
       try {
         const response = await new RemoteAuthRepository().login(value);
 
-        if (response?.token) {
-          setToken(response.token);
-          router.push(routes.orders);
+        if (!response?.token) {
+          toast.error("A bejelentkezési válasz nem tartalmaz tokent.");
+          return;
         }
+
+        setToken(response.token);
+        router.push(routes.orders);
       } catch (error) {
         if (error instanceof ApiError) {
           if (error.status === 401) {

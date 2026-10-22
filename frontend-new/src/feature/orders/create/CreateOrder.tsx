@@ -3,11 +3,9 @@
 import OrderForm from "@/components/orders/OrderForm";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { routes } from "@/lib/routes";
-import { useRouter } from "next/navigation";
 import { useCreateOrder } from "./useCreateOrder";
 
 export const CreateOrder = () => {
-  const router = useRouter();
   const { categories, categoriesError, isLoading, submitError, form } =
     useCreateOrder();
 

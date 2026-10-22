@@ -5,6 +5,7 @@ const variants = {
   primary: "bg-blue-900 text-white hover:bg-blue-950",
   primaryAlt: "bg-blue-700 text-white hover:bg-blue-800",
   secondary: "bg-gray-500 text-white hover:bg-gray-600",
+  danger: "bg-red-500 text-white hover:bg-red-600",
 };
 
 type Variant = keyof typeof variants;

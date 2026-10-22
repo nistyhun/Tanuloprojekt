@@ -12,6 +12,10 @@ async function request<TResponse>(
 ): Promise<TResponse> {
   const token = requiresAuth ? getToken() : null;
 
+  if (requiresAuth && !token) {
+    throw new UnauthorizedError();
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method,
     headers: {
