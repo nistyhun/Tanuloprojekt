@@ -20,18 +20,29 @@ class DbOrderRepository:
     DbRestRepository(OrderTable),
     OrderRepository {
 
-    override suspend fun getAllOrders(): List<Order> {
+    override suspend fun getOrders(page: Int, size: Int): List<Order> {
+        val offset = (page.toLong() - 1) * size
         return transaction {
-            OrderTable.selectAll().map { row ->
-                Order(
-                    id = row[OrderTable.id].value,
-                    categoryId = row[OrderTable.categoryId].value,
-                    customerName = row[OrderTable.customerName],
-                    deadline = row[OrderTable.deadline],
-                    quantity = row[OrderTable.quantity],
-                    publisherName = row[OrderTable.publisherName]
-                )
+            OrderTable.selectAll()
+                .orderBy(OrderTable.id)
+                .limit(size)
+                .offset(offset)
+                .map { row ->
+                    Order(
+                        id = row[OrderTable.id].value,
+                        categoryId = row[OrderTable.categoryId].value,
+                        customerName = row[OrderTable.customerName],
+                        deadline = row[OrderTable.deadline],
+                        quantity = row[OrderTable.quantity],
+                        publisherName = row[OrderTable.publisherName]
+                    )
             }
+        }
+    }
+
+    override suspend fun countOrders(): Long {
+        return  transaction {
+            OrderTable.selectAll().count()
         }
     }
 

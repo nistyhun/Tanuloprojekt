@@ -9,8 +9,12 @@ class OrderService(
     private val orderRepository: OrderRepository
 ) {
 
-    suspend fun getAllOrders(): List<Order> {
-        return orderRepository.getAllOrders()
+    suspend fun getOrders(page: Int, size: Int): List<Order> {
+        return orderRepository.getOrders(page, size)
+    }
+
+    suspend fun countOrders(): Long {
+        return orderRepository.countOrders()
     }
 
     suspend fun getOrderById(id: Int): OrderDetails {

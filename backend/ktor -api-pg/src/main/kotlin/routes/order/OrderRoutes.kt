@@ -24,8 +24,24 @@ fun Route.configureOrderRoutes(orderService: OrderService) {
     val adminRole = "ADMIN"
 
     get("/orders") {
-        val orders = orderService.getAllOrders()
-        call.respond(OrderListDto.fromEntity(orders))
+        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+
+        if (page < 1 || size !in 1..100) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid pagination parameters.")
+            return@get
+        }
+
+        val orders = orderService.getOrders(page, size)
+        val totalCount = orderService.countOrders()
+        call.respond(
+            OrderListDto.fromEntity(
+                orders = orders,
+                totalCount = totalCount,
+                currentPage = page,
+                size = size
+            )
+        )
     }
     get("/orders/{id}") {
         val id = call.parameters["id"]?.toIntOrNull() ?: throw ValidationException("Invalid order id")
