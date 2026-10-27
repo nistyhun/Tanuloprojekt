@@ -3,6 +3,7 @@
 import { useAuthError } from "@/app/hooks/useAuthError";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { Category, UpdateOrder } from "@/app/types/order";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteCategoryRepository } from "@/repository/categories/RemoteCategoryRepository";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
@@ -10,6 +11,7 @@ import { useForm } from "@tanstack/react-form";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { orderFormSchema } from "../order-form-schema";
+import { OrderFormValues } from "../order-form-types";
 
 const defaultOrderValues = {
   customerName: "",
@@ -17,7 +19,7 @@ const defaultOrderValues = {
   categoryId: 0,
   deadline: "",
   quantity: 1,
-};
+} satisfies OrderFormValues;
 
 export const useEditOrder = () => {
   const router = useRouter();
@@ -64,9 +66,7 @@ export const useEditOrder = () => {
 
         console.error("A rendelés módosítása sikertelen:", error);
 
-        setSubmitError(
-          error instanceof Error ? error.message : "Ismeretlen hiba történt.",
-        );
+        setSubmitError(getErrorMessage(error));
       }
     },
   });
@@ -99,7 +99,7 @@ export const useEditOrder = () => {
           return;
         }
         console.error("A rendelés lekérési hibája:", error);
-        setOrderError("Nem sikerült betölteni a rendelés adatait.");
+        setOrderError(getErrorMessage(error));
       } finally {
         if (!ignore) {
           setIsOrderLoading(false);
@@ -120,7 +120,7 @@ export const useEditOrder = () => {
         if (handleAuthError(error)) {
           return;
         }
-        setCategoriesError("Nem sikerült betölteni a kategóriákat.");
+        setCategoriesError(getErrorMessage(error));
       } finally {
         if (!ignore) {
           setIsCategoriesLoading(false);

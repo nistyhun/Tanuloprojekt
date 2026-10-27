@@ -7,5 +7,3 @@ export const orderFormSchema = z.object({
   deadline: z.string().min(1, "A határidő megadása kötelező."),
   quantity: z.number().min(1, "A menyiség legalább 1 legyen."),
 });
-
-export type CreateOrderFormValues = z.infer<typeof orderFormSchema>;

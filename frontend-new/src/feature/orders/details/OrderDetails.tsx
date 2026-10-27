@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, ButtonLink } from "@/components/ui/button";
 import { routes } from "@/lib/routes";
 import Link from "next/link";
 import { useOrderDetails } from "./useOrderDetails";
@@ -43,24 +44,23 @@ export const OrderDetails = () => {
             <p>Határidő: {order.deadline}</p>
             <p>Mennyiség: {order.quantity} db</p>
             <div className="mt-2">
-              <Link
+              <ButtonLink
+                className="mr-2"
+                variant="primary"
                 href={routes.orderEdit(id)}
-                className="mr-2 cursor-pointer rounded-md bg-blue-600 p-2 text-white"
               >
                 Szerkesztés
-              </Link>
-              <button
-                className="mr-2 cursor-pointer rounded-md bg-red-500 p-2 text-white"
+              </ButtonLink>
+              <Button
+                className="mr-2"
+                variant="danger"
                 onClick={openDeleteModal}
               >
                 Törlés
-              </button>
-              <Link
-                href={routes.orders}
-                className="cursor-pointer rounded-md bg-gray-500 text-white p-2"
-              >
+              </Button>
+              <ButtonLink variant="secondary" href={routes.orders}>
                 Vissza
-              </Link>
+              </ButtonLink>
             </div>
           </>
         )}
@@ -74,22 +74,22 @@ export const OrderDetails = () => {
             {deleteError && (
               <p className="mt-2 text-sm text-red-500">{deleteError}</p>
             )}
-            <div className="mt-4">
-              <button
+            <div className="mt-4 flex gap-2">
+              <Button
                 onClick={closeDeleteModal}
                 disabled={isDeleting}
-                className="mr-2 cursor-pointer rounded-md bg-gray-500 p-2 text-white"
+                variant="secondary"
               >
-                Mégse
-              </button>
+                Mégsem
+              </Button>
 
-              <button
+              <Button
                 onClick={handleDelete}
-                className="cursor-pointer rounded-md bg-red-500 p-2 text-white"
                 disabled={isDeleting}
+                variant="danger"
               >
                 {isDeleting ? "Törlés..." : "Törlés"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

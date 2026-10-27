@@ -1,0 +1,21 @@
+import { ComponentPropsWithoutRef } from "react";
+
+export const Select = ({
+  className = "",
+  children,
+  ...props
+}: ComponentPropsWithoutRef<"select">) => {
+  return (
+    <select
+      {...props}
+      className={`
+        w-full rounded-md border border-gray-300
+        bg-white px-3 py-2 text-gray-900
+        focus:border-blue-500 focus:outline-none
+        ${className}
+      `}
+    >
+      {children}
+    </select>
+  );
+};

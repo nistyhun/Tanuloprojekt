@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "@/api/api-config";
 import { deleteToken, getToken } from "@/lib/auth";
-import { ApiError, UnauthorizedError } from "@/lib/error";
+import { ApiError, NetworkError, UnauthorizedError } from "@/lib/error";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -15,15 +15,23 @@ async function request<TResponse>(
   if (requiresAuth && !token) {
     throw new UnauthorizedError();
   }
+  let response: Response;
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method,
-    headers: {
-      ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-  });
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method,
+      headers: {
+        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new NetworkError();
+    }
+    throw error;
+  }
 
   if (response.status === 401 && requiresAuth) {
     deleteToken();

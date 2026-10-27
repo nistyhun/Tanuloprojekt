@@ -30,72 +30,23 @@ export const EditOrder = () => {
         )}
         {id && !isLoading && !orderError && !categoriesError && (
           <form
+            noValidate
+            className="flex flex-col gap-4"
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
               void form.handleSubmit();
             }}
           >
-            <form.Subscribe
-              selector={(state) => ({
-                customerName: state.values.customerName,
-                publisherName: state.values.publisherName,
-                categoryId: state.values.categoryId,
-                deadline: state.values.deadline,
-                quantity: state.values.quantity,
-                errors: state.fieldMeta,
-              })}
-            >
-              {({
-                customerName,
-                publisherName,
-                categoryId,
-                deadline,
-                quantity,
-                errors: fieldMeta,
-              }) => {
-                return (
-                  <OrderForm
-                    title="Rendelés szerkesztése"
-                    customerName={customerName}
-                    onCustomerNameChange={(value) =>
-                      form.setFieldValue("customerName", value)
-                    }
-                    publisherName={publisherName}
-                    onPublisherNameChange={(value) =>
-                      form.setFieldValue("publisherName", value)
-                    }
-                    categories={categories}
-                    categoryId={categoryId}
-                    onCategoryChange={(value) =>
-                      form.setFieldValue("categoryId", value)
-                    }
-                    deadline={deadline}
-                    onDeadlineChange={(value) =>
-                      form.setFieldValue("deadline", value)
-                    }
-                    quantity={quantity}
-                    onQuantityChange={(value) =>
-                      form.setFieldValue("quantity", value)
-                    }
-                    errors={{
-                      customerName:
-                        fieldMeta.customerName?.errors[0]?.message ?? "",
-                      publisherName:
-                        fieldMeta.publisherName?.errors[0]?.message ?? "",
-                      categoryId:
-                        fieldMeta.categoryId?.errors[0]?.message ?? "",
-                      deadline: fieldMeta.deadline?.errors[0]?.message ?? "",
-                      quantity: fieldMeta.quantity?.errors[0]?.message ?? "",
-                    }}
-                  />
-                );
-              }}
-            </form.Subscribe>
+            <OrderForm
+              title="Rendelés szerkesztése"
+              form={form}
+              categories={categories}
+            />
             {submitError && (
               <p className="text-sm text-red-500">{submitError}</p>
             )}
-            <div className="mt-2">
+            <div className="mt-2 flex gap-2">
               <form.Subscribe selector={(state) => state.isSubmitting}>
                 {(isSubmitting) => (
                   <Button

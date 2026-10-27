@@ -1,114 +1,107 @@
 import type { Category } from "@/app/types/order";
+import { FormFieldError } from "@/components/ui/form-field-error";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import type { useCreateOrder } from "@/feature/orders/create/useCreateOrder";
+import { FormTextField } from "../ui/form-text-field";
 
-type OrderFormErrors = {
-  customerName: string;
-  publisherName: string;
-  categoryId: string;
-  deadline: string;
-  quantity: string;
-};
+type OrderFormApi = ReturnType<typeof useCreateOrder>["form"];
 
 type OrderFormProps = {
   title: string;
-  customerName: string;
-  onCustomerNameChange: (value: string) => void;
-  publisherName: string;
-  onPublisherNameChange: (value: string) => void;
+  form: OrderFormApi;
   categories: Category[];
-  categoryId: number;
-  onCategoryChange: (value: number) => void;
-  deadline: string;
-  onDeadlineChange: (value: string) => void;
-  quantity: number;
-  onQuantityChange: (value: number) => void;
-  errors: OrderFormErrors;
 };
 
-export default function OrderForm({
-  title,
-  customerName,
-  onCustomerNameChange,
-  publisherName,
-  onPublisherNameChange,
-  categories,
-  categoryId,
-  onCategoryChange,
-  deadline,
-  onDeadlineChange,
-  quantity,
-  onQuantityChange,
-  errors,
-}: OrderFormProps) {
+export default function OrderForm({ title, form, categories }: OrderFormProps) {
   return (
     <div>
       <h2 className="mb-6 text-2xl font-semibold">{title}</h2>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="customerName">Megrendelő</label>
-        <input
-          type="text"
-          id="customerName"
-          className="border border-gray-400 rounded-md p-1"
-          value={customerName}
-          onChange={(e) => onCustomerNameChange(e.target.value)}
-        ></input>
-        {errors.customerName && (
-          <p className="text-sm text-red-500">{errors.customerName}</p>
-        )}
-        <label htmlFor="publisherName">Kiadó</label>
-        <input
-          type="text"
-          id="publisherName"
-          name="publisherName"
-          className="border border-gray-400 rounded-md p-1"
-          value={publisherName}
-          onChange={(e) => onPublisherNameChange(e.target.value)}
-        ></input>
-        {errors.publisherName && (
-          <p className="text-sm text-red-500">{errors.publisherName}</p>
-        )}
-        <label htmlFor="category">Kategória</label>
-        <select
-          id="category"
-          name="category"
-          className="border border-gray-400 rounded-md p-1"
-          value={categoryId}
-          onChange={(e) => onCategoryChange(Number(e.target.value))}
-        >
-          <option value="0">Válassz kategóriát</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.type}
-            </option>
-          ))}
-        </select>
-        {errors.categoryId && (
-          <p className="text-sm text-red-500">{errors.categoryId}</p>
-        )}
-        <label htmlFor="deadline">Határidő</label>
-        <input
-          id="deadline"
-          name="deadline"
-          type="date"
-          className="border border-gray-400 rounded-md p-1"
-          value={deadline}
-          onChange={(e) => onDeadlineChange(e.target.value)}
-        ></input>
-        {errors.deadline && (
-          <p className="text-sm text-red-500">{errors.deadline}</p>
-        )}
-        <label htmlFor="quantity">Mennyiség</label>
-        <input
-          id="quantity"
-          name="quantity"
-          type="number"
-          min={1}
-          className="border border-gray-400 rounded-md p-1"
-          value={quantity}
-          onChange={(e) => onQuantityChange(Number(e.target.value))}
-        ></input>
-        {errors.quantity && (
-          <p className="text-sm text-red-500">{errors.quantity}</p>
-        )}
+      <div className="flex flex-col gap-4">
+        <form.Field name="customerName">
+          {(field) => (
+            <FormTextField
+              label="Megrendelő"
+              id={field.name}
+              name={field.name}
+              type="text"
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
+
+        <form.Field name="publisherName">
+          {(field) => (
+            <FormTextField
+              label="Kiadó"
+              id={field.name}
+              name={field.name}
+              type="text"
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
+
+        <form.Field name="categoryId">
+          {(field) => (
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={field.name}>Kategória</Label>
+              <Select
+                id={field.name}
+                name={field.name}
+                value={field.state.value}
+                onChange={(e) => field.handleChange(Number(e.target.value))}
+                onBlur={field.handleBlur}
+                aria-invalid={field.state.meta.errors.length > 0}
+              >
+                <option value={0}>Válassz kategóriát</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.type}
+                  </option>
+                ))}
+              </Select>
+              <FormFieldError errors={field.state.meta.errors} />
+            </div>
+          )}
+        </form.Field>
+
+        <form.Field name="deadline">
+          {(field) => (
+            <FormTextField
+              label="Határidő"
+              id={field.name}
+              name={field.name}
+              type="date"
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
+
+        <form.Field name="quantity">
+          {(field) => (
+            <FormTextField
+              label="Mennyiség"
+              id={field.name}
+              name={field.name}
+              type="number"
+              min={1}
+              value={field.state.value}
+              onChange={(e) => field.handleChange(Number(e.target.value))}
+              onBlur={field.handleBlur}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
       </div>
     </div>
   );

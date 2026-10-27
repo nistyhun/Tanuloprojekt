@@ -11,5 +11,13 @@ export class ApiError extends Error {
 export class UnauthorizedError extends Error {
   constructor() {
     super("Unauthorized");
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class NetworkError extends Error {
+  constructor() {
+    super("Nem sikerült kapcsolódni a szerverhez.");
+    this.name = "NetworkError";
   }
 }

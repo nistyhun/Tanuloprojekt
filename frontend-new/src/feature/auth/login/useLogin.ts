@@ -1,16 +1,24 @@
 "use client";
 
-import { setToken } from "@/lib/auth";
+import { getToken, setToken } from "@/lib/auth";
 import { ApiError } from "@/lib/error";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteAuthRepository } from "@/repository/auth/RemoteAuthRepository";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { loginFormSchema } from "./login-form-schema";
 
 export const useLogin = () => {
   const router = useRouter();
+
+  useEffect(() => {
+    if (getToken()) {
+      router.replace(routes.orders);
+    }
+  }, [router]);
 
   const form = useForm({
     defaultValues: {
@@ -37,14 +45,10 @@ export const useLogin = () => {
             toast.error("Hibás email vagy jelszó.");
             return;
           }
-          if (error.status >= 500) {
-            toast.error("Szerverhiba. Próbáld újra később.");
-            return;
-          }
         }
 
-        console.error("Váratlan bejelentezési hiba:", error);
-        toast.error("Nem sikerült bejelentkezni.");
+        console.error("Bejelentezési hiba:", error);
+        toast.error(getErrorMessage(error));
       }
     },
   });

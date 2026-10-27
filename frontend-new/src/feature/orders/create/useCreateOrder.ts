@@ -6,6 +6,7 @@ import type {
   Category,
   CreateOrder as CreateOrderDto,
 } from "@/app/types/order";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteCategoryRepository } from "@/repository/categories/RemoteCategoryRepository";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
@@ -13,6 +14,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { orderFormSchema } from "../order-form-schema";
+import { OrderFormValues } from "../order-form-types";
 
 export const useCreateOrder = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -31,7 +33,7 @@ export const useCreateOrder = () => {
       categoryId: 0,
       deadline: "",
       quantity: 1,
-    },
+    } satisfies OrderFormValues,
     validators: {
       onChange: orderFormSchema,
     },
@@ -53,9 +55,7 @@ export const useCreateOrder = () => {
 
         console.error("Rendelés mentési hiba", error);
 
-        setSubmitError(
-          error instanceof Error ? error.message : "Ismeretlen hiba történt.",
-        );
+        setSubmitError(getErrorMessage(error));
       }
     },
   });
@@ -82,7 +82,7 @@ export const useCreateOrder = () => {
         if (handleAuthError(error)) {
           return;
         }
-        setCategoriesError("Nem sikerült betölteni a kategóriákat.");
+        setCategoriesError(getErrorMessage(error));
       } finally {
         if (!ignore) {
           setIsLoading(false);

@@ -3,6 +3,7 @@
 import { useAuthError } from "@/app/hooks/useAuthError";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { OrderDetails as OrderDetailsDto } from "@/app/types/order";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
 import { useParams, useRouter } from "next/navigation";
@@ -50,7 +51,7 @@ export const useOrderDetails = () => {
         return;
       }
       console.error("A rendelés törlése sikertelen:", error);
-      setDeleteError("Nem sikerült törölni a rendelést.");
+      setDeleteError(getErrorMessage(error));
     } finally {
       setIsDeleting(false);
     }
@@ -84,7 +85,7 @@ export const useOrderDetails = () => {
         }
 
         console.error("A rendelés lekérési hibája:", error);
-        setOrderError("Nem sikerült betölteni a rendelést.");
+        setOrderError(getErrorMessage(error));
       } finally {
         if (!ignore) {
           setIsLoading(false);

@@ -3,6 +3,7 @@
 import { useAuthError } from "@/app/hooks/useAuthError";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import type { Order } from "@/app/types/order";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
 import { useEffect, useState } from "react";
 
@@ -32,7 +33,7 @@ export const useOrders = () => {
         if (handleAuthError(error)) return;
 
         console.error("A rendelések lekérési hibája:", error);
-        setOrdersError("Nem sikerült betölteni a rendeléseket.");
+        setOrdersError(getErrorMessage(error));
       } finally {
         if (!ignore) {
           setIsLoading(false);
