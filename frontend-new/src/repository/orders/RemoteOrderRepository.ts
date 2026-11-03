@@ -1,20 +1,14 @@
 import { apiClient } from "@/api/api-client";
 import { endpoints } from "@/api/endpoints";
-import type {
-  CreateOrder,
-  Order,
-  OrderDetails,
-  UpdateOrder,
-} from "@/app/types/order";
+import type { CreateOrder, OrderDetails, UpdateOrder } from "@/app/types/order";
 import { OrdersResponseDto } from "./dto/orders-response";
 import { OrderRepository } from "./OrderRepository";
 
 export class RemoteOrderRepository implements OrderRepository {
-  async getOrders(): Promise<Order[]> {
-    const response = await apiClient.get<OrdersResponseDto>(
-      endpoints.orders.list,
+  async getOrders(page: number, size: number): Promise<OrdersResponseDto> {
+    return apiClient.get<OrdersResponseDto>(
+      `${endpoints.orders.list}?page=${page}&size=${size}`,
     );
-    return response.orders;
   }
   async getOrderById(id: string): Promise<OrderDetails> {
     const response = await apiClient.get<OrderDetails>(
