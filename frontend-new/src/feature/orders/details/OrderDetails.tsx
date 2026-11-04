@@ -2,13 +2,14 @@
 
 import { Button, ButtonLink } from "@/components/ui/button";
 import { routes } from "@/lib/routes";
-import Link from "next/link";
 import { useOrderDetails } from "./useOrderDetails";
 
 export const OrderDetails = () => {
   const {
     id,
     order,
+    backUrl,
+    queryString,
     isDeleteModalOpen,
     deleteError,
     orderError,
@@ -19,6 +20,10 @@ export const OrderDetails = () => {
     closeDeleteModal,
   } = useOrderDetails();
 
+  const editUrl = queryString
+    ? `${routes.orderEdit(id)}?${queryString}`
+    : routes.orderEdit(id);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
@@ -27,12 +32,9 @@ export const OrderDetails = () => {
         {orderError && (
           <>
             <p className="mb-4 text-sm text-red-500">{orderError}</p>
-            <Link
-              href={"/orders"}
-              className="cursor-pointer rounded-md bg-gray-500 text-white p-2"
-            >
+            <ButtonLink variant="secondary" href={backUrl}>
               Vissza
-            </Link>
+            </ButtonLink>
           </>
         )}
         {order && (
@@ -44,11 +46,7 @@ export const OrderDetails = () => {
             <p>Határidő: {order.deadline}</p>
             <p>Mennyiség: {order.quantity} db</p>
             <div className="mt-2">
-              <ButtonLink
-                className="mr-2"
-                variant="primary"
-                href={routes.orderEdit(id)}
-              >
+              <ButtonLink className="mr-2" variant="primary" href={editUrl}>
                 Szerkesztés
               </ButtonLink>
               <Button
@@ -58,7 +56,7 @@ export const OrderDetails = () => {
               >
                 Törlés
               </Button>
-              <ButtonLink variant="secondary" href={routes.orders}>
+              <ButtonLink variant="secondary" href={backUrl}>
                 Vissza
               </ButtonLink>
             </div>

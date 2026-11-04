@@ -8,7 +8,7 @@ import { routes } from "@/lib/routes";
 import { RemoteCategoryRepository } from "@/repository/categories/RemoteCategoryRepository";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
 import { useForm } from "@tanstack/react-form";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { orderFormSchema } from "../order-form-schema";
 import { OrderFormValues } from "../order-form-types";
@@ -23,10 +23,15 @@ const defaultOrderValues = {
 
 export const useEditOrder = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
   const [categories, setCategories] = useState<Category[]>([]);
-
   const params = useParams();
   const orderId = typeof params.id === "string" ? params.id : "";
+
+  const detailsUrl = queryString
+    ? `${routes.orderDetails(orderId)}?${queryString}`
+    : routes.orderDetails(orderId);
   const getAuthToken = useRequireAuth();
   const handleAuthError = useAuthError();
 
@@ -58,7 +63,7 @@ export const useEditOrder = () => {
 
         await new RemoteOrderRepository().updateOrder(orderId, updatedOrder);
 
-        router.push(routes.orderDetails(orderId));
+        router.push(detailsUrl);
       } catch (error) {
         if (handleAuthError(error)) {
           return;
@@ -142,6 +147,7 @@ export const useEditOrder = () => {
 
   return {
     id: orderId,
+    detailsUrl,
     categories,
     categoriesError,
     orderError,

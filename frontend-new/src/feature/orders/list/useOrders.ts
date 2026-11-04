@@ -7,6 +7,10 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  DEFAULT_ORDERS_PAGE_SIZE,
+  ORDERS_PAGE_SIZES,
+} from "./pagination-config";
 
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -15,7 +19,12 @@ export const useOrders = () => {
   const searchParams = useSearchParams();
   const pageParam = Number(searchParams.get("page") ?? 1);
   const page = Number.isInteger(pageParam) && pageParam >= 1 ? pageParam : 1;
-  const size = 10;
+  const sizeParam = Number(
+    searchParams.get("size") ?? DEFAULT_ORDERS_PAGE_SIZE,
+  );
+  const size = ORDERS_PAGE_SIZES.some((value) => value === sizeParam)
+    ? sizeParam
+    : DEFAULT_ORDERS_PAGE_SIZE;
   const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -57,13 +66,14 @@ export const useOrders = () => {
     return () => {
       ignore = true;
     };
-  }, [page, getAuthToken, handleAuthError]);
+  }, [page, size, getAuthToken, handleAuthError]);
 
   return {
     orders,
     ordersError,
     isLoading,
     page,
+    size,
     totalPages,
     totalCount,
   };

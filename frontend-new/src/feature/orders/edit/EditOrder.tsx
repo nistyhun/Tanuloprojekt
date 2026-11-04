@@ -2,12 +2,12 @@
 
 import OrderForm from "@/components/orders/OrderForm";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { routes } from "@/lib/routes";
 import { useEditOrder } from "./useEditOrder";
 
 export const EditOrder = () => {
   const {
     id,
+    detailsUrl,
     categories,
     categoriesError,
     orderError,
@@ -58,7 +58,7 @@ export const EditOrder = () => {
                   </Button>
                 )}
               </form.Subscribe>
-              <ButtonLink href={routes.orderDetails(id)} variant="secondary">
+              <ButtonLink href={detailsUrl} variant="secondary">
                 Vissza
               </ButtonLink>
             </div>

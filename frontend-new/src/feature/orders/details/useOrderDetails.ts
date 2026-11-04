@@ -6,7 +6,7 @@ import type { OrderDetails as OrderDetailsDto } from "@/app/types/order";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export const useOrderDetails = () => {
@@ -23,6 +23,13 @@ export const useOrderDetails = () => {
   const getAuthToken = useRequireAuth();
   const handleAuthError = useAuthError();
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+
+  const backUrl = queryString
+    ? `${routes.orders}?${queryString}`
+    : routes.orders;
 
   function openDeleteModal() {
     setDeleteError("");
@@ -45,7 +52,7 @@ export const useOrderDetails = () => {
     try {
       await new RemoteOrderRepository().deleteOrder(orderId);
       setIsDeleteModalOpen(false);
-      router.push(routes.orders);
+      router.push(backUrl);
     } catch (error) {
       if (handleAuthError(error)) {
         return;
@@ -103,6 +110,8 @@ export const useOrderDetails = () => {
   return {
     id: orderId,
     order,
+    backUrl,
+    queryString,
     isDeleteModalOpen,
     deleteError,
     isLoading: Boolean(orderId) && isLoading,

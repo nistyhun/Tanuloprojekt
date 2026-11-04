@@ -4,9 +4,11 @@ import Link from "next/link";
 
 type OrderCardProps = {
   order: Order;
+  page: number;
+  size: number;
 };
 
-export const OrderCard = ({ order }: OrderCardProps) => {
+export const OrderCard = ({ order, page, size }: OrderCardProps) => {
   return (
     <article className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold">{order.customerName}</h2>
@@ -20,7 +22,7 @@ export const OrderCard = ({ order }: OrderCardProps) => {
         Részletek:{" "}
         <Link
           className="text-blue-500"
-          href={routes.orderDetails(String(order.id))}
+          href={`${routes.orderDetails(String(order.id))}?page=${page}&size=${size}`}
         >
           Link
         </Link>
