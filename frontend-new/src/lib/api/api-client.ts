@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/api/api-config";
+import { API_BASE_URL } from "@/lib/api/api-config";
 import { deleteToken, getToken } from "@/lib/auth";
 import { ApiError, NetworkError, UnauthorizedError } from "@/lib/error";
 
@@ -62,11 +62,15 @@ async function request<TResponse>(
 export const apiClient = {
   get: <TResponse>(endpoint: string) => request<TResponse>(endpoint, "GET"),
 
-  post: <TResponse, TBody>(
-    endpoint: string,
-    body: TBody,
-    requiresAuth = true,
-  ) => request<TResponse>(endpoint, "POST", body, requiresAuth),
+  post: <TResponse, TBody>({
+    endpoint,
+    body,
+    requiresAuth,
+  }: {
+    endpoint: string;
+    body: TBody;
+    requiresAuth: boolean;
+  }) => request<TResponse>(endpoint, "POST", body, requiresAuth),
 
   put: <TResponse, TBody>(endpoint: string, body: TBody) =>
     request<TResponse>(endpoint, "PUT", body),

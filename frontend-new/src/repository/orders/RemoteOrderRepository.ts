@@ -1,6 +1,10 @@
 import { apiClient } from "@/api/api-client";
 import { endpoints } from "@/api/endpoints";
-import type { CreateOrder, OrderDetails, UpdateOrder } from "@/app/types/order";
+import type {
+  CreateOrder,
+  OrderDetails,
+  UpdateOrder,
+} from "@/feature/orders/types/order";
 import { OrdersResponseDto } from "./dto/orders-response";
 import { OrderRepository } from "./OrderRepository";
 

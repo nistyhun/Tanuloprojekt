@@ -1,4 +1,8 @@
-import type { CreateOrder, OrderDetails, UpdateOrder } from "@/app/types/order";
+import type {
+  CreateOrder,
+  OrderDetails,
+  UpdateOrder,
+} from "@/feature/orders/types/order";
 import type { OrdersResponseDto } from "./dto/orders-response";
 
 export interface OrderRepository {

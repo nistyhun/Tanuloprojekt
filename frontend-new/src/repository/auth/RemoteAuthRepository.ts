@@ -6,10 +6,10 @@ import { TokenDto } from "./dto/token";
 
 export class RemoteAuthRepository implements AuthRepository {
   async login(credentials: Credentials): Promise<TokenDto | undefined> {
-    return apiClient.post<TokenDto, Credentials>(
-      endpoints.auth.login,
-      credentials,
-      false,
-    );
+    return apiClient.post<TokenDto, Credentials>({
+      endpoint: endpoints.auth.login,
+      body: credentials,
+      requiresAuth: false,
+    });
   }
 }

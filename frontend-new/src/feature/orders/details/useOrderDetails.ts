@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuthError } from "@/app/hooks/useAuthError";
-import { useRequireAuth } from "@/app/hooks/useRequireAuth";
-import type { OrderDetails as OrderDetailsDto } from "@/app/types/order";
+import { useAuthError } from "@/feature/auth/hooks/useAuthError";
+import { useRequireAuth } from "@/feature/auth/hooks/useRequireAuth";
+import type { OrderDetails as OrderDetailsDto } from "@/feature/orders/types/order";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";

@@ -1,7 +1,7 @@
 "use client";
 
-import OrderForm from "@/components/orders/OrderForm";
 import { Button, ButtonLink } from "@/components/ui/button";
+import OrderForm from "@/feature/orders/components/OrderForm";
 import { routes } from "@/lib/routes";
 import { useCreateOrder } from "./useCreateOrder";
 

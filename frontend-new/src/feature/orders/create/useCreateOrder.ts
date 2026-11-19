@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuthError } from "@/app/hooks/useAuthError";
-import { useRequireAuth } from "@/app/hooks/useRequireAuth";
+import { useAuthError } from "@/feature/auth/hooks/useAuthError";
+import { useRequireAuth } from "@/feature/auth/hooks/useRequireAuth";
 import type {
   Category,
   CreateOrder as CreateOrderDto,
-} from "@/app/types/order";
+} from "@/feature/orders/types/order";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteCategoryRepository } from "@/repository/categories/RemoteCategoryRepository";

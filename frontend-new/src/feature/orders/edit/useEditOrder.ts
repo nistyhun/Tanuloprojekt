@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuthError } from "@/app/hooks/useAuthError";
-import { useRequireAuth } from "@/app/hooks/useRequireAuth";
-import type { Category, UpdateOrder } from "@/app/types/order";
+import { useAuthError } from "@/feature/auth/hooks/useAuthError";
+import { useRequireAuth } from "@/feature/auth/hooks/useRequireAuth";
+import type { Category, UpdateOrder } from "@/feature/orders/types/order";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
 import { RemoteCategoryRepository } from "@/repository/categories/RemoteCategoryRepository";

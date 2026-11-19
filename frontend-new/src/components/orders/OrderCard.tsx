@@ -1,4 +1,4 @@
-import type { Order } from "@/app/types/order";
+import type { Order } from "@/feature/orders/types/order";
 import { routes } from "@/lib/routes";
 import Link from "next/link";
 

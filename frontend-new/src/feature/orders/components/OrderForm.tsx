@@ -1,9 +1,9 @@
-import type { Category } from "@/app/types/order";
 import { FormFieldError } from "@/components/ui/form-field-error";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { useCreateOrder } from "@/feature/orders/create/useCreateOrder";
-import { FormTextField } from "../ui/form-text-field";
+import type { Category } from "@/feature/orders/types/order";
+import { FormTextField } from "../../../components/ui/form-text-field";
 
 type OrderFormApi = ReturnType<typeof useCreateOrder>["form"];
 
