@@ -32,7 +32,7 @@ export const useEditOrder = () => {
   const detailsUrl = queryString
     ? `${routes.orderDetails(orderId)}?${queryString}`
     : routes.orderDetails(orderId);
-  const getAuthToken = useRequireAuth();
+  useRequireAuth();
   const handleAuthError = useAuthError();
 
   const [categoriesError, setCategoriesError] = useState("");
@@ -50,9 +50,7 @@ export const useEditOrder = () => {
       onChange: orderFormSchema,
     },
     onSubmit: async ({ value }) => {
-      const token = getAuthToken();
-
-      if (!token || !orderId) {
+      if (!orderId) {
         return;
       }
 
@@ -78,11 +76,6 @@ export const useEditOrder = () => {
 
   useEffect(() => {
     let ignore = false;
-    const token = getAuthToken();
-
-    if (!token) {
-      return;
-    }
 
     async function fetchOrderDetails(id: string) {
       try {
@@ -143,7 +136,7 @@ export const useEditOrder = () => {
     return () => {
       ignore = true;
     };
-  }, [orderId, getAuthToken, handleAuthError]);
+  }, [orderId, handleAuthError]);
 
   return {
     id: orderId,

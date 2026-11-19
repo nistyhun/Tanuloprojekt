@@ -23,7 +23,7 @@ export const useCreateOrder = () => {
   const [submitError, setSubmitError] = useState("");
   const router = useRouter();
 
-  const getAuthToken = useRequireAuth();
+  useRequireAuth();
   const handleAuthError = useAuthError();
 
   const form = useForm({
@@ -38,10 +38,6 @@ export const useCreateOrder = () => {
       onChange: orderFormSchema,
     },
     onSubmit: async ({ value }) => {
-      const token = getAuthToken();
-
-      if (!token) return;
-
       setSubmitError("");
 
       try {
@@ -62,12 +58,6 @@ export const useCreateOrder = () => {
 
   useEffect(() => {
     let ignore = false;
-
-    const token = getAuthToken();
-
-    if (!token) {
-      return;
-    }
 
     async function fetchCategories() {
       try {
@@ -94,7 +84,7 @@ export const useCreateOrder = () => {
     return () => {
       ignore = true;
     };
-  }, [getAuthToken, handleAuthError]);
+  }, [handleAuthError]);
 
   return {
     categories,

@@ -1,6 +1,10 @@
 import { Credentials } from "./dto/credentials";
-import { TokenDto } from "./dto/token";
+import { LoginResponseDto, UserDto } from "./dto/login-response";
 
 export interface AuthRepository {
-  login: (credentials: Credentials) => Promise<TokenDto | undefined>;
+  login: (credentials: Credentials) => Promise<LoginResponseDto | undefined>;
+
+  getCurrentUser(): Promise<UserDto | undefined>;
+
+  logout(): Promise<void>;
 }

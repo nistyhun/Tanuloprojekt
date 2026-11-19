@@ -1,10 +1,10 @@
-import { apiClient } from "@/api/api-client";
-import { endpoints } from "@/api/endpoints";
 import type {
   CreateOrder,
   OrderDetails,
   UpdateOrder,
 } from "@/feature/orders/types/order";
+import { apiClient } from "@/lib/api/api-client";
+import { endpoints } from "@/lib/api/endpoints";
 import { OrdersResponseDto } from "./dto/orders-response";
 import { OrderRepository } from "./OrderRepository";
 
@@ -21,7 +21,11 @@ export class RemoteOrderRepository implements OrderRepository {
     return response;
   }
   async createOrder(order: CreateOrder): Promise<void> {
-    await apiClient.post<void, CreateOrder>(endpoints.orders.list, order);
+    await apiClient.post<void, CreateOrder>({
+      endpoint: endpoints.orders.list,
+      body: order,
+      requiresAuth: true,
+    });
   }
   async updateOrder(id: string, order: UpdateOrder): Promise<void> {
     await apiClient.put<void, UpdateOrder>(endpoints.orders.byId(id), order);

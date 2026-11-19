@@ -1,6 +1,6 @@
-import { apiClient } from "@/api/api-client";
-import { endpoints } from "@/api/endpoints";
 import type { Category } from "@/feature/orders/types/order";
+import { apiClient } from "@/lib/api/api-client";
+import { endpoints } from "@/lib/api/endpoints";
 import type { CategoryRepository } from "./CategoryRepository";
 
 type CategoriesResponse = {

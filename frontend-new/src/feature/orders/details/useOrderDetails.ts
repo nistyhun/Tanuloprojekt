@@ -20,7 +20,7 @@ export const useOrderDetails = () => {
   const params = useParams();
   const orderId = typeof params.id === "string" ? params.id : "";
 
-  const getAuthToken = useRequireAuth();
+  useRequireAuth();
   const handleAuthError = useAuthError();
   const router = useRouter();
 
@@ -42,9 +42,7 @@ export const useOrderDetails = () => {
   }
 
   async function handleDelete() {
-    const token = getAuthToken();
-
-    if (!token || !orderId) {
+    if (!orderId) {
       return;
     }
     setDeleteError("");
@@ -66,12 +64,6 @@ export const useOrderDetails = () => {
 
   useEffect(() => {
     let ignore = false;
-
-    const token = getAuthToken();
-
-    if (!token) {
-      return;
-    }
 
     if (!orderId) {
       return;
@@ -105,7 +97,7 @@ export const useOrderDetails = () => {
     return () => {
       ignore = true;
     };
-  }, [orderId, getAuthToken, handleAuthError]);
+  }, [orderId, handleAuthError]);
 
   return {
     id: orderId,

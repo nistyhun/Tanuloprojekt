@@ -32,8 +32,6 @@ export const useOrders = () => {
   const handleAuthError = useAuthError();
 
   useEffect(() => {
-    if (!getAuthToken()) return;
-
     let ignore = false;
 
     const fetchOrders = async () => {

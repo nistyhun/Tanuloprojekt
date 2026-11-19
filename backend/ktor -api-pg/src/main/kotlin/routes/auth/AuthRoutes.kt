@@ -14,6 +14,7 @@ import io.ktor.server.routing.post
 import com.example.routes.auth.dto.LoginDto
 import com.example.routes.auth.dto.LoginResponseDto
 import com.example.routes.auth.dto.UserDto
+import io.ktor.http.Cookie
 
 fun Route.configureAuthRoutes(authService: AuthService) {
     post("/auth/register") {
@@ -34,10 +35,38 @@ fun Route.configureAuthRoutes(authService: AuthService) {
 
         val result = authService.login(request.toEntity())
 
+        call.response.cookies.append(
+            Cookie(
+                name = "access_token",
+                value = result.token,
+                httpOnly = true,
+                secure = false,
+                path = "/",
+                maxAge = 60 * 60,
+                extensions = mapOf("SameSite" to "Lax")
+            )
+        )
+
         call.respond(
             HttpStatusCode.OK,
             LoginResponseDto.fromEntity(result)
         )
+    }
+
+    post("/auth/logout") {
+        call.response.cookies.append(
+            Cookie(
+                name = "access_token",
+                value = "",
+                httpOnly = true,
+                secure = false,
+                path = "/",
+                maxAge = 0,
+                extensions = mapOf("SameSite" to "Lax")
+            )
+        )
+
+        call.respond(HttpStatusCode.NoContent)
     }
 }
 

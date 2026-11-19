@@ -3,6 +3,7 @@ package com.example
 import com.example.routes.dto.ErrorResponse
 import com.example.setup.plugin.auth.JwtConfig
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -12,6 +13,12 @@ fun Application.configureAuthentication(jwtConfig: JwtConfig) {
     install(Authentication) {
         jwt("auth-jwt") {
             realm = jwtConfig.realm
+
+            authHeader { call ->
+                call.request.cookies["access_token"]?.let { token ->
+                    HttpAuthHeader.Single("Bearer", token)
+                }
+            }
 
             verifier(
                 com.auth0.jwt.JWT
