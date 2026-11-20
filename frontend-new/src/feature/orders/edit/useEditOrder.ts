@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthError } from "@/feature/auth/hooks/useAuthError";
-import { useRequireAuth } from "@/feature/auth/hooks/useRequireAuth";
 import type { Category, UpdateOrder } from "@/feature/orders/types/order";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
@@ -32,7 +31,6 @@ export const useEditOrder = () => {
   const detailsUrl = queryString
     ? `${routes.orderDetails(orderId)}?${queryString}`
     : routes.orderDetails(orderId);
-  useRequireAuth();
   const handleAuthError = useAuthError();
 
   const [categoriesError, setCategoriesError] = useState("");

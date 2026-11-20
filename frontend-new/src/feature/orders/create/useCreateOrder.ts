@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthError } from "@/feature/auth/hooks/useAuthError";
-import { useRequireAuth } from "@/feature/auth/hooks/useRequireAuth";
 import type {
   Category,
   CreateOrder as CreateOrderDto,
@@ -23,7 +22,6 @@ export const useCreateOrder = () => {
   const [submitError, setSubmitError] = useState("");
   const router = useRouter();
 
-  useRequireAuth();
   const handleAuthError = useAuthError();
 
   const form = useForm({

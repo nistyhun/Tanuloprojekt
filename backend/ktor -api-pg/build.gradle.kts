@@ -60,6 +60,7 @@ dependencies {
     implementation("de.mkammerer:argon2-jvm:2.11")
     implementation("io.ktor:ktor-server-auth-jwt:3.5.2")
     implementation("io.ktor:ktor-server-cors-jvm:3.5.2")
+    implementation("io.ktor:ktor-server-csrf:3.5.2")
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)

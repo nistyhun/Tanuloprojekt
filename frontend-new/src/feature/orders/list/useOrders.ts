@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthError } from "@/feature/auth/hooks/useAuthError";
-import { useRequireAuth } from "@/feature/auth/hooks/useRequireAuth";
 import type { Order } from "@/feature/orders/types/order";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { RemoteOrderRepository } from "@/repository/orders/RemoteOrderRepository";
@@ -27,8 +26,6 @@ export const useOrders = () => {
     : DEFAULT_ORDERS_PAGE_SIZE;
   const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-
-  const getAuthToken = useRequireAuth();
   const handleAuthError = useAuthError();
 
   useEffect(() => {
@@ -64,7 +61,7 @@ export const useOrders = () => {
     return () => {
       ignore = true;
     };
-  }, [page, size, getAuthToken, handleAuthError]);
+  }, [page, size, handleAuthError]);
 
   return {
     orders,

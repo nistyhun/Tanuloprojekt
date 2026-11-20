@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthError } from "@/feature/auth/hooks/useAuthError";
-import { useRequireAuth } from "@/feature/auth/hooks/useRequireAuth";
 import type { OrderDetails as OrderDetailsDto } from "@/feature/orders/types/order";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { routes } from "@/lib/routes";
@@ -20,7 +19,6 @@ export const useOrderDetails = () => {
   const params = useParams();
   const orderId = typeof params.id === "string" ? params.id : "";
 
-  useRequireAuth();
   const handleAuthError = useAuthError();
   const router = useRouter();
 

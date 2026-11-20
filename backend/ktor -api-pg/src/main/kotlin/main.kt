@@ -16,6 +16,7 @@ import com.example.setup.plugin.configureSerialization
 import com.example.setup.plugin.configureStatusPages
 import io.ktor.server.application.*
 import kotlinx.coroutines.runBlocking
+import com.example.setup.plugin.configureCsrf
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -54,6 +55,7 @@ fun Application.module() {
     configureSerialization()
     configureStatusPages()
     configureCors()
+    configureCsrf()
     configureAuthentication(jwtConfig)
 
     configureRouting(
