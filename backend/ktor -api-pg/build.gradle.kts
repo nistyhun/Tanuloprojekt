@@ -5,7 +5,7 @@ buildscript {
 
     dependencies {
         classpath("org.flywaydb:flyway-database-postgresql:13.2.0")
-        classpath("org.postgresql:postgresql:42.7.8")
+        classpath("org.postgresql:postgresql:42.7.15")
     }
 }
 
@@ -49,7 +49,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-migration-jdbc:${exposedVersion}")
-    implementation("org.postgresql:postgresql:42.7.8")
+    implementation("org.postgresql:postgresql:42.7.15")
     implementation("net.datafaker:datafaker:2.4.4")
     implementation("io.ktor:ktor-server-content-negotiation:3.5.2")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.2")
@@ -61,6 +61,11 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt:3.5.2")
     implementation("io.ktor:ktor-server-cors-jvm:3.5.2")
     implementation("io.ktor:ktor-server-csrf:3.5.2")
+
+    constraints {
+        implementation("tools.jackson.core:jackson-databind:3.1.8") { because("CVE fixes") }
+        implementation("tools.jackson.core:jackson-core:3.1.8") { because("CVE fixes") }
+    }
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
